@@ -133,23 +133,17 @@ class MprisService {
           if (key == 'xesam:title') {
             title = _extractString(val);
           } else if (key == 'xesam:artist') {
-            if (val is DBusArray) {
-              artist = val.children
-                  .map((v) => _extractString(v))
-                  .where((s) => s.isNotEmpty)
-                  .join(', ');
-            } else {
-              artist = _extractString(val);
-            }
+            artist = _extractString(val);
           } else if (key == 'xesam:album') {
             album = _extractString(val);
           } else if (key == 'mpris:artUrl') {
             artUrl = _extractString(val);
           } else if (key == 'mpris:length') {
-            if (val is DBusInt64) {
-              duration = Duration(microseconds: val.value);
-            } else if (val is DBusUint64) {
-              duration = Duration(microseconds: val.value);
+            final unwrapped = _unwrap(val);
+            if (unwrapped is DBusInt64) {
+              duration = Duration(microseconds: unwrapped.value);
+            } else if (unwrapped is DBusUint64) {
+              duration = Duration(microseconds: unwrapped.value);
             }
           }
         }
@@ -183,10 +177,23 @@ class MprisService {
     }
   }
 
+  DBusValue _unwrap(DBusValue value) {
+    if (value is DBusVariant) {
+      return _unwrap(value.value);
+    }
+    return value;
+  }
+
   String _extractString(DBusValue value) {
-    if (value is DBusString) return value.value;
-    if (value is DBusVariant) return _extractString(value.value);
-    return value.toString();
+    final unwrapped = _unwrap(value);
+    if (unwrapped is DBusString) return unwrapped.value;
+    if (unwrapped is DBusArray) {
+      return unwrapped.children
+          .map((v) => _extractString(v))
+          .where((s) => s.isNotEmpty)
+          .join(', ');
+    }
+    return '';
   }
 
   Future<void> playPause() async {
