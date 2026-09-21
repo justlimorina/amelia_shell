@@ -138,7 +138,8 @@ class _AlbumArt extends StatelessWidget {
             width: 44,
             height: 44,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _fallbackIcon(colorScheme),
+            errorBuilder: (context, error, stackTrace) =>
+                _fallbackIcon(colorScheme),
           );
         }
       } else if (artUrl!.startsWith('http://') || artUrl!.startsWith('https://')) {
@@ -147,7 +148,8 @@ class _AlbumArt extends StatelessWidget {
           width: 44,
           height: 44,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallbackIcon(colorScheme),
+          errorBuilder: (context, error, stackTrace) =>
+              _fallbackIcon(colorScheme),
         );
       }
     }

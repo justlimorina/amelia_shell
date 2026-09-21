@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/theme.dart';
+import '../status_tray/date_pill.dart';
 import '../status_tray/status_tray_pill.dart';
 import 'shelf_app_button.dart';
 import 'shelf_app_item.dart';
 
 class ShelfWidget extends StatefulWidget {
   final bool isLauncherOpen;
+  final bool isCalendarOpen;
   final bool isQuickSettingsOpen;
   final VoidCallback onToggleLauncher;
+  final VoidCallback onToggleCalendar;
   final VoidCallback onToggleQuickSettings;
 
   const ShelfWidget({
     super.key,
     required this.isLauncherOpen,
+    required this.isCalendarOpen,
     required this.isQuickSettingsOpen,
     required this.onToggleLauncher,
+    required this.onToggleCalendar,
     required this.onToggleQuickSettings,
   });
 
@@ -67,7 +72,15 @@ class _ShelfWidgetState extends State<ShelfWidget> {
             ),
           ),
 
-          // 3. Status Tray Pill (End)
+          // 3. Date Pill (ChromeOS Calendar toggle)
+          DatePill(
+            isOpen: widget.isCalendarOpen,
+            onTap: widget.onToggleCalendar,
+          ),
+
+          const SizedBox(width: 8),
+
+          // 4. Status Tray Pill (End)
           StatusTrayPill(
             isOpen: widget.isQuickSettingsOpen,
             onTap: widget.onToggleQuickSettings,

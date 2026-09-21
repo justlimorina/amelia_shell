@@ -73,12 +73,12 @@ static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
+  GdkScreen* screen = gtk_window_get_screen(window);
 
   gboolean layer_supported = gtk_layer_is_supported();
   gboolean use_header_bar = !layer_supported;
 
 #ifdef GDK_WINDOWING_X11
-  GdkScreen* screen = gtk_window_get_screen(window);
   if (GDK_IS_X11_SCREEN(screen)) {
     const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
     if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
@@ -115,7 +115,6 @@ static void my_application_activate(GApplication* application) {
   }
 
   // Configure RGBA visual for transparency
-  GdkScreen* screen = gtk_window_get_screen(window);
   GdkVisual* rgba_visual = gdk_screen_get_rgba_visual(screen);
   if (rgba_visual != nullptr) {
     gtk_widget_set_visual(GTK_WIDGET(window), rgba_visual);

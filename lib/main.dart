@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'core/services/layer_shell_service.dart';
+import 'core/services/mpris_service.dart';
 import 'core/services/system_service.dart';
 import 'core/theme/theme.dart';
+import 'features/calendar/calendar_panel.dart';
 import 'features/launcher/launcher_panel.dart';
 import 'features/quick_settings/quick_settings_panel.dart';
 import 'features/shelf/shelf_widget.dart';
@@ -9,8 +11,9 @@ import 'features/shelf/shelf_widget.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Start system services (clock, battery)
+  // Start system services (clock, battery, MPRIS media)
   SystemService().start();
+  MprisService().start();
 
   // Check if running under Wayland Layer Shell
   await LayerShellService.checkLayerSupport();
@@ -42,12 +45,14 @@ class ShellScreen extends StatefulWidget {
 
 class _ShellScreenState extends State<ShellScreen> {
   bool _isLauncherOpen = false;
+  bool _isCalendarOpen = false;
   bool _isQuickSettingsOpen = false;
 
   void _closeAllOverlays() {
-    if (_isLauncherOpen || _isQuickSettingsOpen) {
+    if (_isLauncherOpen || _isCalendarOpen || _isQuickSettingsOpen) {
       setState(() {
         _isLauncherOpen = false;
+        _isCalendarOpen = false;
         _isQuickSettingsOpen = false;
       });
       // Shrink layer surface back to shelf height
@@ -59,11 +64,11 @@ class _ShellScreenState extends State<ShellScreen> {
   void _toggleLauncher() {
     setState(() {
       _isLauncherOpen = !_isLauncherOpen;
+      _isCalendarOpen = false;
       _isQuickSettingsOpen = false;
     });
 
     if (_isLauncherOpen) {
-      // Expand window height to accommodate Launcher panel
       LayerShellService.setHeight(600);
     } else {
       LayerShellService.setHeight(56);
@@ -71,14 +76,29 @@ class _ShellScreenState extends State<ShellScreen> {
     }
   }
 
+  void _toggleCalendar() {
+    setState(() {
+      _isCalendarOpen = !_isCalendarOpen;
+      _isLauncherOpen = false;
+      _isQuickSettingsOpen = false;
+    });
+
+    if (_isCalendarOpen) {
+      LayerShellService.setHeight(600);
+      LayerShellService.setKeyboardMode(false);
+    } else {
+      LayerShellService.setHeight(56);
+    }
+  }
+
   void _toggleQuickSettings() {
     setState(() {
       _isQuickSettingsOpen = !_isQuickSettingsOpen;
       _isLauncherOpen = false;
+      _isCalendarOpen = false;
     });
 
     if (_isQuickSettingsOpen) {
-      // Expand window height to accommodate Quick Settings panel
       LayerShellService.setHeight(600);
       LayerShellService.setKeyboardMode(false);
     } else {
@@ -88,7 +108,8 @@ class _ShellScreenState extends State<ShellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hasOverlay = _isLauncherOpen || _isQuickSettingsOpen;
+    final hasOverlay =
+        _isLauncherOpen || _isCalendarOpen || _isQuickSettingsOpen;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -114,7 +135,17 @@ class _ShellScreenState extends State<ShellScreen> {
               ),
             ),
 
-          // 3. Quick Settings Popup (Anchored at Bottom-Right above Shelf)
+          // 3. Calendar Popup (Anchored right above Date Pill)
+          if (_isCalendarOpen)
+            Positioned(
+              right: 180,
+              bottom: AmeliaTheme.shelfHeight + 8,
+              child: CalendarPanel(
+                onClose: _closeAllOverlays,
+              ),
+            ),
+
+          // 4. Quick Settings Popup (Anchored at Bottom-Right above Shelf)
           if (_isQuickSettingsOpen)
             Positioned(
               right: 12,
@@ -124,13 +155,15 @@ class _ShellScreenState extends State<ShellScreen> {
               ),
             ),
 
-          // 4. Main Shelf (Anchored at Bottom Edge)
+          // 5. Main Shelf (Anchored at Bottom Edge)
           Align(
             alignment: Alignment.bottomCenter,
             child: ShelfWidget(
               isLauncherOpen: _isLauncherOpen,
+              isCalendarOpen: _isCalendarOpen,
               isQuickSettingsOpen: _isQuickSettingsOpen,
               onToggleLauncher: _toggleLauncher,
+              onToggleCalendar: _toggleCalendar,
               onToggleQuickSettings: _toggleQuickSettings,
             ),
           ),
