@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/system_service.dart';
 
 class StatusTrayPill extends StatefulWidget {
@@ -20,6 +21,14 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
   bool _isHovered = false;
   final _timeFormat = DateFormat('HH:mm');
 
+  IconData _getBatteryIcon(BatteryInfo battery) {
+    if (battery.isCharging) return Symbols.battery_charging_full_rounded;
+    if (battery.percentage >= 85) return Symbols.battery_full_rounded;
+    if (battery.percentage >= 50) return Symbols.battery_5_bar_rounded;
+    if (battery.percentage >= 20) return Symbols.battery_3_bar_rounded;
+    return Symbols.battery_alert_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -35,18 +44,18 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           height: 38,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: widget.isOpen
                 ? colorScheme.primaryContainer
                 : (_isHovered
-                    ? colorScheme.onSurface.withValues(alpha: 0.15)
-                    : colorScheme.onSurface.withValues(alpha: 0.08)),
+                    ? colorScheme.surfaceContainerHighest
+                    : colorScheme.surfaceContainerHigh),
             borderRadius: BorderRadius.circular(19),
             border: Border.all(
               color: widget.isOpen
-                  ? colorScheme.primary.withValues(alpha: 0.4)
-                  : Colors.white.withValues(alpha: 0.08),
+                  ? colorScheme.primary.withValues(alpha: 0.5)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.35),
               width: 1,
             ),
           ),
@@ -61,15 +70,19 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
                 stream: systemService.batteryStream,
                 initialData: systemService.currentBattery,
                 builder: (context, batterySnapshot) {
-                  final battery = batterySnapshot.data ?? systemService.currentBattery;
+                  final battery =
+                      batterySnapshot.data ?? systemService.currentBattery;
 
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Network Icon
                       Icon(
-                        Icons.wifi_rounded,
-                        size: 16,
+                        Symbols.wifi_rounded,
+                        size: 18,
+                        fill: 1,
+                        weight: 300,
+                        grade: 0,
                         color: widget.isOpen
                             ? colorScheme.onPrimaryContainer
                             : colorScheme.onSurface,
@@ -78,8 +91,11 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
 
                       // Audio Icon
                       Icon(
-                        Icons.volume_up_rounded,
-                        size: 16,
+                        Symbols.volume_up_rounded,
+                        size: 18,
+                        fill: 1,
+                        weight: 300,
+                        grade: 0,
                         color: widget.isOpen
                             ? colorScheme.onPrimaryContainer
                             : colorScheme.onSurface,
@@ -89,12 +105,11 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
                       // Battery Icon
                       if (battery.isPresent) ...[
                         Icon(
-                          battery.isCharging
-                              ? Icons.battery_charging_full_rounded
-                              : (battery.percentage > 20
-                                  ? Icons.battery_std_rounded
-                                  : Icons.battery_alert_rounded),
-                          size: 16,
+                          _getBatteryIcon(battery),
+                          size: 18,
+                          fill: 1,
+                          weight: 300,
+                          grade: 0,
                           color: widget.isOpen
                               ? colorScheme.onPrimaryContainer
                               : (battery.percentage <= 20 && !battery.isCharging
@@ -110,6 +125,7 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
+                          fontFamily: 'Roboto',
                           color: widget.isOpen
                               ? colorScheme.onPrimaryContainer
                               : colorScheme.onSurface,
@@ -127,4 +143,3 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
     );
   }
 }
-

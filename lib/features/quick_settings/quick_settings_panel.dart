@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/network_service.dart';
 import '../../core/services/system_service.dart';
+import '../../core/theme/theme.dart';
 import '../media_player/media_player_card.dart';
 
 enum QuickSettingsView { main, wifi, bluetooth }
@@ -23,7 +25,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
   bool _bluetoothEnabled = true;
   bool _dndEnabled = false;
   bool _nightLightEnabled = false;
-  bool _darkMode = true;
 
   double _volume = 0.75;
   double _brightness = 0.8;
@@ -71,23 +72,22 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       width: 360,
-      constraints: const BoxConstraints(maxHeight: 540),
+      constraints: const BoxConstraints(maxHeight: 560),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.95),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -116,6 +116,8 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
   Widget _buildMainView(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final systemService = SystemService();
+    final themeService = ThemeService();
+    final isDark = themeService.isDarkMode;
     final dateStr = DateFormat('EEEE, MMM d').format(DateTime.now());
 
     return Column(
@@ -130,12 +132,13 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Roboto',
                 color: colorScheme.onSurface,
               ),
             ),
             const Spacer(),
             _HeaderIconButton(
-              icon: Icons.settings_outlined,
+              icon: Symbols.settings_rounded,
               tooltip: 'Settings',
               onTap: () {
                 Process.run('gnome-control-center', []);
@@ -144,7 +147,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
             ),
             const SizedBox(width: 6),
             _HeaderIconButton(
-              icon: Icons.lock_outline_rounded,
+              icon: Symbols.lock_rounded,
               tooltip: 'Lock Screen',
               onTap: () {
                 Process.run('loginctl', ['lock-session']);
@@ -153,7 +156,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
             ),
             const SizedBox(width: 6),
             _HeaderIconButton(
-              icon: Icons.power_settings_new_rounded,
+              icon: Symbols.power_settings_new_rounded,
               tooltip: 'Power Menu',
               color: colorScheme.error,
               onTap: () {
@@ -177,8 +180,8 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
             Expanded(
               child: _QuickTogglePill(
                 icon: _wifiEnabled
-                    ? Icons.wifi_rounded
-                    : Icons.wifi_off_rounded,
+                    ? Symbols.wifi_rounded
+                    : Symbols.wifi_off_rounded,
                 label: _wifiEnabled ? 'Wi-Fi' : 'Off',
                 isActive: _wifiEnabled,
                 onToggle: () {
@@ -193,8 +196,8 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
             Expanded(
               child: _QuickTogglePill(
                 icon: _bluetoothEnabled
-                    ? Icons.bluetooth_rounded
-                    : Icons.bluetooth_disabled_rounded,
+                    ? Symbols.bluetooth_rounded
+                    : Symbols.bluetooth_disabled_rounded,
                 label: _bluetoothEnabled ? 'Bluetooth' : 'Off',
                 isActive: _bluetoothEnabled,
                 onToggle: () =>
@@ -210,8 +213,8 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
             Expanded(
               child: _QuickTogglePill(
                 icon: _dndEnabled
-                    ? Icons.do_not_disturb_on_rounded
-                    : Icons.do_not_disturb_off_rounded,
+                    ? Symbols.do_not_disturb_on_rounded
+                    : Symbols.do_not_disturb_off_rounded,
                 label: 'Do not disturb',
                 isActive: _dndEnabled,
                 onToggle: () => setState(() => _dndEnabled = !_dndEnabled),
@@ -220,7 +223,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
             const SizedBox(width: 10),
             Expanded(
               child: _QuickTogglePill(
-                icon: Icons.nightlight_round,
+                icon: Symbols.nightlight_rounded,
                 label: 'Night Light',
                 isActive: _nightLightEnabled,
                 onToggle: () =>
@@ -234,18 +237,21 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
           children: [
             Expanded(
               child: _QuickTogglePill(
-                icon: _darkMode
-                    ? Icons.dark_mode_rounded
-                    : Icons.light_mode_rounded,
-                label: _darkMode ? 'Dark theme' : 'Light theme',
-                isActive: _darkMode,
-                onToggle: () => setState(() => _darkMode = !_darkMode),
+                icon: isDark
+                    ? Symbols.dark_mode_rounded
+                    : Symbols.light_mode_rounded,
+                label: isDark ? 'Dark theme' : 'Light theme',
+                isActive: isDark,
+                onToggle: () {
+                  themeService.toggleTheme();
+                  setState(() {});
+                },
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _QuickTogglePill(
-                icon: Icons.cast_rounded,
+                icon: Symbols.cast_rounded,
                 label: 'Cast',
                 isActive: false,
                 onToggle: () {},
@@ -261,9 +267,12 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
           children: [
             Icon(
               _volume > 0
-                  ? Icons.volume_up_rounded
-                  : Icons.volume_mute_rounded,
+                  ? Symbols.volume_up_rounded
+                  : Symbols.volume_mute_rounded,
               size: 20,
+              fill: 1,
+              weight: 300,
+              grade: 0,
               color: colorScheme.onSurfaceVariant,
             ),
             Expanded(
@@ -295,8 +304,11 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
         Row(
           children: [
             Icon(
-              Icons.brightness_medium_rounded,
+              Symbols.brightness_medium_rounded,
               size: 20,
+              fill: 1,
+              weight: 300,
+              grade: 0,
               color: colorScheme.onSurfaceVariant,
             ),
             Expanded(
@@ -322,7 +334,10 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
         ),
 
         const SizedBox(height: 10),
-        const Divider(height: 1, color: Color(0x22FFFFFF)),
+        Divider(
+          height: 1,
+          color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+        ),
         const SizedBox(height: 10),
 
         // Battery Info Footer
@@ -335,9 +350,12 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
               children: [
                 Icon(
                   battery.isCharging
-                      ? Icons.battery_charging_full_rounded
-                      : Icons.battery_std_rounded,
+                      ? Symbols.battery_charging_full_rounded
+                      : Symbols.battery_full_rounded,
                   size: 18,
+                  fill: 1,
+                  weight: 300,
+                  grade: 0,
                   color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
@@ -347,6 +365,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Roboto',
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -370,7 +389,12 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(
+                Symbols.arrow_back_rounded,
+                fill: 1,
+                weight: 300,
+                grade: 0,
+              ),
               iconSize: 20,
               visualDensity: VisualDensity.compact,
               onPressed: () =>
@@ -382,6 +406,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Roboto',
                 color: colorScheme.onSurface,
               ),
             ),
@@ -394,7 +419,12 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
               )
             else
               IconButton(
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const Icon(
+                  Symbols.refresh_rounded,
+                  fill: 1,
+                  weight: 300,
+                  grade: 0,
+                ),
                 iconSize: 20,
                 visualDensity: VisualDensity.compact,
                 onPressed: _scanWifi,
@@ -412,7 +442,10 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
         ),
 
         const SizedBox(height: 8),
-        const Divider(height: 1, color: Color(0x22FFFFFF)),
+        Divider(
+          height: 1,
+          color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+        ),
         const SizedBox(height: 8),
 
         // Available Networks List
@@ -426,7 +459,10 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                       _isScanningWifi
                           ? 'Searching for networks...'
                           : 'No Wi-Fi networks found',
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontFamily: 'Roboto',
+                      ),
                     ),
                   ),
                 )
@@ -440,13 +476,10 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 8),
                       leading: Icon(
-                        net.isConnected
-                            ? Icons.wifi_rounded
-                            : (net.signal > 60
-                                ? Icons.wifi_rounded
-                                : (net.signal > 30
-                                    ? Icons.network_wifi_2_bar_rounded
-                                    : Icons.network_wifi_1_bar_rounded)),
+                        Symbols.wifi_rounded,
+                        fill: 1,
+                        weight: 300,
+                        grade: 0,
                         color: net.isConnected
                             ? colorScheme.primary
                             : colorScheme.onSurface,
@@ -459,6 +492,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                           fontWeight: net.isConnected
                               ? FontWeight.w700
                               : FontWeight.w500,
+                          fontFamily: 'Roboto',
                           color: net.isConnected
                               ? colorScheme.primary
                               : colorScheme.onSurface,
@@ -469,6 +503,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                               'Connected',
                               style: TextStyle(
                                 fontSize: 11,
+                                fontFamily: 'Roboto',
                                 color: colorScheme.primary,
                               ),
                             )
@@ -480,8 +515,11 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
                               child: Icon(
-                                Icons.lock_outline_rounded,
-                                size: 15,
+                                Symbols.lock_rounded,
+                                size: 16,
+                                fill: 1,
+                                weight: 300,
+                                grade: 0,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
@@ -489,6 +527,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
                             '${net.signal}%',
                             style: TextStyle(
                               fontSize: 11,
+                              fontFamily: 'Roboto',
                               color: colorScheme.onSurfaceVariant,
                             ),
                           ),
@@ -519,7 +558,12 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(
+                Symbols.arrow_back_rounded,
+                fill: 1,
+                weight: 300,
+                grade: 0,
+              ),
               iconSize: 20,
               visualDensity: VisualDensity.compact,
               onPressed: () =>
@@ -531,6 +575,7 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Roboto',
                 color: colorScheme.onSurface,
               ),
             ),
@@ -545,7 +590,10 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
           ],
         ),
         const SizedBox(height: 8),
-        const Divider(height: 1, color: Color(0x22FFFFFF)),
+        Divider(
+          height: 1,
+          color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+        ),
         const SizedBox(height: 16),
         Center(
           child: Padding(
@@ -554,7 +602,10 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
               _bluetoothEnabled
                   ? 'Manage devices in Settings'
                   : 'Bluetooth is turned off',
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontFamily: 'Roboto',
+              ),
             ),
           ),
         ),
@@ -591,12 +642,15 @@ class _HeaderIconButton extends StatelessWidget {
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.08),
+              color: colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
-              size: 17,
+              size: 18,
+              fill: 1,
+              weight: 300,
+              grade: 0,
               color: color ?? colorScheme.onSurface,
             ),
           ),
@@ -630,12 +684,12 @@ class _QuickTogglePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: isActive
             ? colorScheme.primaryContainer
-            : colorScheme.onSurface.withValues(alpha: 0.08),
+            : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isActive
-              ? colorScheme.primary.withValues(alpha: 0.4)
-              : Colors.white.withValues(alpha: 0.05),
+              ? colorScheme.primary.withValues(alpha: 0.5)
+              : colorScheme.outlineVariant.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -656,7 +710,10 @@ class _QuickTogglePill extends StatelessWidget {
                     children: [
                       Icon(
                         icon,
-                        size: 19,
+                        size: 20,
+                        fill: 1,
+                        weight: 300,
+                        grade: 0,
                         color: isActive
                             ? colorScheme.onPrimaryContainer
                             : colorScheme.onSurfaceVariant,
@@ -670,6 +727,7 @@ class _QuickTogglePill extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
                             color: isActive
                                 ? colorScheme.onPrimaryContainer
                                 : colorScheme.onSurface,
@@ -689,8 +747,8 @@ class _QuickTogglePill extends StatelessWidget {
               width: 1,
               height: 24,
               color: isActive
-                  ? colorScheme.onPrimaryContainer.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.08),
+                  ? colorScheme.onPrimaryContainer.withValues(alpha: 0.2)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
             Material(
               color: Colors.transparent,
@@ -703,8 +761,11 @@ class _QuickTogglePill extends StatelessWidget {
                   height: 48,
                   alignment: Alignment.center,
                   child: Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18,
+                    Symbols.chevron_right_rounded,
+                    size: 20,
+                    fill: 1,
+                    weight: 300,
+                    grade: 0,
                     color: isActive
                         ? colorScheme.onPrimaryContainer
                         : colorScheme.onSurfaceVariant,

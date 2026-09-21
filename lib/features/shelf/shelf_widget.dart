@@ -32,58 +32,58 @@ class _ShelfWidgetState extends State<ShelfWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       height: AmeliaTheme.shelfHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: AmeliaTheme.shelfBackgroundDark,
-        border: const Border(
+        color: colorScheme.surfaceContainer.withValues(alpha: 0.85),
+        border: Border(
           top: BorderSide(
-            color: AmeliaTheme.shelfBorderDark,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
             width: 1,
           ),
         ),
       ),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          // 1. ChromeOS Circular Launcher Button (Start)
-          _LauncherButton(
-            isOpen: widget.isLauncherOpen,
-            onTap: widget.onToggleLauncher,
+          // 1. Left (Start Edge): ChromeOS Launcher Button
+          Positioned(
+            left: 12,
+            child: _LauncherButton(
+              isOpen: widget.isLauncherOpen,
+              onTap: widget.onToggleLauncher,
+            ),
           ),
 
-          const SizedBox(width: 12),
-
-          // Vertical divider line (ChromeOS style)
-          Container(
-            width: 1,
-            height: 24,
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
-
-          const SizedBox(width: 8),
-
-          // 2. Pinned Apps (Center)
-          Expanded(
+          // 2. Center (True Monitor Center): Pinned & Running Apps
+          Center(
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: _pinnedApps
                   .map((app) => ShelfAppButton(item: app))
                   .toList(),
             ),
           ),
 
-          // 3. Date Pill (ChromeOS Calendar toggle)
-          DatePill(
-            isOpen: widget.isCalendarOpen,
-            onTap: widget.onToggleCalendar,
-          ),
-
-          const SizedBox(width: 8),
-
-          // 4. Status Tray Pill (End)
-          StatusTrayPill(
-            isOpen: widget.isQuickSettingsOpen,
-            onTap: widget.onToggleQuickSettings,
+          // 3. Right (End Edge): Date Pill & Status Tray Pill
+          Positioned(
+            right: 12,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DatePill(
+                  isOpen: widget.isCalendarOpen,
+                  onTap: widget.onToggleCalendar,
+                ),
+                const SizedBox(width: 8),
+                StatusTrayPill(
+                  isOpen: widget.isQuickSettingsOpen,
+                  onTap: widget.onToggleQuickSettings,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -127,15 +127,15 @@ class _LauncherButtonState extends State<_LauncherButton> {
               color: widget.isOpen
                   ? colorScheme.primaryContainer
                   : (_isHovered
-                      ? colorScheme.onSurface.withValues(alpha: 0.15)
+                      ? colorScheme.onSurface.withValues(alpha: 0.1)
                       : Colors.transparent),
               shape: BoxShape.circle,
             ),
             child: Center(
               // ChromeOS iconic concentric circle launcher icon
               child: Container(
-                width: 18,
-                height: 18,
+                width: 20,
+                height: 20,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(

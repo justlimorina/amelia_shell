@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/mpris_service.dart';
 
 class MediaPlayerCard extends StatelessWidget {
@@ -23,10 +24,10 @@ class MediaPlayerCard extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 14),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
               width: 1,
             ),
           ),
@@ -51,6 +52,7 @@ class MediaPlayerCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
+                            fontFamily: 'Roboto',
                             color: colorScheme.onSurface,
                           ),
                         ),
@@ -61,6 +63,7 @@ class MediaPlayerCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
+                            fontFamily: 'Roboto',
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -73,8 +76,13 @@ class MediaPlayerCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.skip_previous_rounded),
-                        iconSize: 20,
+                        icon: const Icon(
+                          Symbols.skip_previous_rounded,
+                          fill: 1,
+                          weight: 300,
+                          grade: 0,
+                        ),
+                        iconSize: 22,
                         visualDensity: VisualDensity.compact,
                         onPressed: () => mpris.previous(),
                         tooltip: 'Previous',
@@ -90,18 +98,26 @@ class MediaPlayerCard extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           icon: Icon(
                             track.isPlaying
-                                ? Icons.pause_rounded
-                                : Icons.play_arrow_rounded,
+                                ? Symbols.pause_rounded
+                                : Symbols.play_arrow_rounded,
+                            fill: 1,
+                            weight: 300,
+                            grade: 0,
                             color: colorScheme.onPrimary,
-                            size: 20,
+                            size: 22,
                           ),
                           onPressed: () => mpris.playPause(),
                           tooltip: track.isPlaying ? 'Pause' : 'Play',
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.skip_next_rounded),
-                        iconSize: 20,
+                        icon: const Icon(
+                          Symbols.skip_next_rounded,
+                          fill: 1,
+                          weight: 300,
+                          grade: 0,
+                        ),
+                        iconSize: 22,
                         visualDensity: VisualDensity.compact,
                         onPressed: () => mpris.next(),
                         tooltip: 'Next',
@@ -167,7 +183,10 @@ class _AlbumArt extends StatelessWidget {
 
   Widget _fallbackIcon(ColorScheme colorScheme) {
     return Icon(
-      Icons.music_note_rounded,
+      Symbols.music_note_rounded,
+      fill: 1,
+      weight: 300,
+      grade: 0,
       color: colorScheme.onPrimaryContainer,
       size: 24,
     );

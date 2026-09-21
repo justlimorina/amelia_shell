@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class CalendarPanel extends StatefulWidget {
   final VoidCallback onClose;
@@ -24,13 +25,15 @@ class _CalendarPanelState extends State<CalendarPanel> {
 
   void _prevMonth() {
     setState(() {
-      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1, 1);
+      _selectedMonth =
+          DateTime(_selectedMonth.year, _selectedMonth.month - 1, 1);
     });
   }
 
   void _nextMonth() {
     setState(() {
-      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 1);
+      _selectedMonth =
+          DateTime(_selectedMonth.year, _selectedMonth.month + 1, 1);
     });
   }
 
@@ -52,7 +55,6 @@ class _CalendarPanelState extends State<CalendarPanel> {
     final firstDayOfMonth = _selectedMonth;
     final daysInMonth =
         DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
-    // 1 = Mon, 7 = Sun
     final startingWeekday = firstDayOfMonth.weekday;
     final prevMonthDays =
         DateTime(_selectedMonth.year, _selectedMonth.month, 0).day;
@@ -69,6 +71,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
+              fontFamily: 'Roboto',
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
@@ -85,6 +88,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
             '$day',
             style: TextStyle(
               fontSize: 13,
+              fontFamily: 'Roboto',
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.25),
             ),
           ),
@@ -127,6 +131,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                   fontWeight: isToday || isSelected
                       ? FontWeight.w700
                       : FontWeight.w400,
+                  fontFamily: 'Roboto',
                   color: isToday
                       ? colorScheme.onPrimary
                       : (isSelected
@@ -144,15 +149,15 @@ class _CalendarPanelState extends State<CalendarPanel> {
       width: 340,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.95),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -170,6 +175,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
+                  fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),
               ),
@@ -186,6 +192,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
+                      fontFamily: 'Roboto',
                       color: colorScheme.primary,
                     ),
                   ),
@@ -193,13 +200,23 @@ class _CalendarPanelState extends State<CalendarPanel> {
               ),
               const SizedBox(width: 4),
               IconButton(
-                icon: const Icon(Icons.chevron_left_rounded),
+                icon: const Icon(
+                  Symbols.chevron_left_rounded,
+                  fill: 1,
+                  weight: 300,
+                  grade: 0,
+                ),
                 iconSize: 20,
                 visualDensity: VisualDensity.compact,
                 onPressed: _prevMonth,
               ),
               IconButton(
-                icon: const Icon(Icons.chevron_right_rounded),
+                icon: const Icon(
+                  Symbols.chevron_right_rounded,
+                  fill: 1,
+                  weight: 300,
+                  grade: 0,
+                ),
                 iconSize: 20,
                 visualDensity: VisualDensity.compact,
                 onPressed: _nextMonth,
@@ -220,15 +237,21 @@ class _CalendarPanelState extends State<CalendarPanel> {
           ),
 
           const SizedBox(height: 16),
-          const Divider(height: 1, color: Color(0x22FFFFFF)),
+          Divider(
+            height: 1,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+          ),
           const SizedBox(height: 12),
 
           // Selected Date Info Card
           Row(
             children: [
               Icon(
-                Icons.event_note_rounded,
+                Symbols.event_note_rounded,
                 size: 20,
+                fill: 1,
+                weight: 300,
+                grade: 0,
                 color: colorScheme.primary,
               ),
               const SizedBox(width: 10),
@@ -238,6 +261,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Roboto',
                     color: colorScheme.onSurface,
                   ),
                 ),
@@ -249,4 +273,3 @@ class _CalendarPanelState extends State<CalendarPanel> {
     );
   }
 }
-

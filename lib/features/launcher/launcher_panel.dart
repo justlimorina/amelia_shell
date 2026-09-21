@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/app_launcher_service.dart';
 import '../../core/services/layer_shell_service.dart';
 
@@ -58,15 +59,15 @@ class _LauncherPanelState extends State<LauncherPanel> {
       height: 520,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.95),
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 28,
             offset: const Offset(0, 8),
           ),
@@ -79,10 +80,10 @@ class _LauncherPanelState extends State<LauncherPanel> {
           Container(
             height: 48,
             decoration: BoxDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.08),
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
                 width: 1,
               ),
             ),
@@ -92,22 +93,33 @@ class _LauncherPanelState extends State<LauncherPanel> {
               onChanged: (val) => setState(() => _searchQuery = val),
               style: TextStyle(
                 fontSize: 14,
+                fontFamily: 'Roboto',
                 color: colorScheme.onSurface,
               ),
               decoration: InputDecoration(
                 hintText: 'Search your apps, web...',
                 hintStyle: TextStyle(
                   color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  fontFamily: 'Roboto',
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(
-                  Icons.search_rounded,
+                  Symbols.search_rounded,
+                  fill: 1,
+                  weight: 300,
+                  grade: 0,
                   color: colorScheme.primary,
                   size: 22,
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18),
+                        icon: const Icon(
+                          Symbols.close_rounded,
+                          fill: 1,
+                          weight: 300,
+                          grade: 0,
+                          size: 18,
+                        ),
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _searchQuery = '');
@@ -133,6 +145,7 @@ class _LauncherPanelState extends State<LauncherPanel> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Roboto',
                 color: colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,
               ),
@@ -149,6 +162,7 @@ class _LauncherPanelState extends State<LauncherPanel> {
                       'No applications found',
                       style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
+                        fontFamily: 'Roboto',
                         fontSize: 14,
                       ),
                     ),
@@ -207,7 +221,7 @@ class _AppGridTileState extends State<_AppGridTile> {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
             color: _isHovered
-                ? colorScheme.onSurface.withValues(alpha: 0.1)
+                ? colorScheme.onSurface.withValues(alpha: 0.08)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
@@ -238,6 +252,7 @@ class _AppGridTileState extends State<_AppGridTile> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
+                  fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),
               ),
@@ -248,4 +263,3 @@ class _AppGridTileState extends State<_AppGridTile> {
     );
   }
 }
-

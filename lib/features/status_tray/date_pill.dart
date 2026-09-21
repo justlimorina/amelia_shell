@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/system_service.dart';
 
 class DatePill extends StatefulWidget {
@@ -40,13 +41,13 @@ class _DatePillState extends State<DatePill> {
             color: widget.isOpen
                 ? colorScheme.primaryContainer
                 : (_isHovered
-                    ? colorScheme.onSurface.withValues(alpha: 0.15)
-                    : colorScheme.onSurface.withValues(alpha: 0.08)),
+                    ? colorScheme.surfaceContainerHighest
+                    : colorScheme.surfaceContainerHigh),
             borderRadius: BorderRadius.circular(19),
             border: Border.all(
               color: widget.isOpen
-                  ? colorScheme.primary.withValues(alpha: 0.4)
-                  : Colors.white.withValues(alpha: 0.08),
+                  ? colorScheme.primary.withValues(alpha: 0.5)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.35),
               width: 1,
             ),
           ),
@@ -59,8 +60,11 @@ class _DatePillState extends State<DatePill> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.calendar_today_rounded,
-                    size: 15,
+                    Symbols.calendar_today_rounded,
+                    size: 16,
+                    fill: 1,
+                    weight: 300,
+                    grade: 0,
                     color: widget.isOpen
                         ? colorScheme.onPrimaryContainer
                         : colorScheme.onSurface,
@@ -71,6 +75,7 @@ class _DatePillState extends State<DatePill> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
+                      fontFamily: 'Roboto',
                       color: widget.isOpen
                           ? colorScheme.onPrimaryContainer
                           : colorScheme.onSurface,
@@ -86,4 +91,3 @@ class _DatePillState extends State<DatePill> {
     );
   }
 }
-

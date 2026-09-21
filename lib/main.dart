@@ -27,11 +27,18 @@ class AmeliaShellApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Amelia Shell',
-      debugShowCheckedModeBanner: false,
-      theme: AmeliaTheme.darkTheme(),
-      home: const ShellScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeService().themeModeNotifier,
+      builder: (context, currentThemeMode, _) {
+        return MaterialApp(
+          title: 'Amelia Shell',
+          debugShowCheckedModeBanner: false,
+          theme: AmeliaTheme.lightTheme(),
+          darkTheme: AmeliaTheme.darkTheme(),
+          themeMode: currentThemeMode,
+          home: const ShellScreen(),
+        );
+      },
     );
   }
 }
