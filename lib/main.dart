@@ -142,10 +142,10 @@ class _ShellScreenState extends State<ShellScreen> {
               ),
             ),
 
-          // 3. Calendar Popup (Anchored right above Date Pill)
+          // 3. Calendar Popup (Anchored right above Date Pill & Tray)
           if (_isCalendarOpen)
             Positioned(
-              right: 180,
+              right: 12,
               bottom: AmeliaTheme.shelfHeight + 8,
               child: CalendarPanel(
                 onClose: _closeAllOverlays,

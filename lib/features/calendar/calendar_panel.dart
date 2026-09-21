@@ -46,31 +46,112 @@ class _CalendarPanelState extends State<CalendarPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final monthFormat = DateFormat('MMMM yyyy');
-    final fullDateFormat = DateFormat('EEEE, d MMMM yyyy');
+    final colorScheme = Theme.of(context).colorScheme;
 
-    // Calendar matrix calculation (Monday-first)
+    return Container(
+      width: 630,
+      height: 480,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 28,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // ==================== LEFT: Notification Center ====================
+          Expanded(
+            child: _buildNotificationCenter(context),
+          ),
+
+          // ==================== Vertical Divider ====================
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: VerticalDivider(
+              width: 1,
+              thickness: 1,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+            ),
+          ),
+
+          // ==================== RIGHT: Calendar & Agenda ====================
+          SizedBox(
+            width: 290,
+            child: _buildCalendarSection(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationCenter(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Symbols.notifications_rounded,
+          size: 56,
+          fill: 1,
+          weight: 300,
+          grade: 0,
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'No Notifications',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Roboto',
+            color: colorScheme.onSurfaceVariant,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendarSection(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final weekdayName = DateFormat('EEEE').format(_today);
+    final fullDateName = DateFormat('MMMM d yyyy').format(_today);
+    final monthName = DateFormat('MMMM').format(_selectedMonth);
+
+    // Calendar matrix calculation (Sunday-first, matching GNOME layout)
     final firstDayOfMonth = _selectedMonth;
     final daysInMonth =
         DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
-    final startingWeekday = firstDayOfMonth.weekday;
     final prevMonthDays =
         DateTime(_selectedMonth.year, _selectedMonth.month, 0).day;
 
+    // Sunday = 7 in Dart DateTime weekday, convert to Sunday = 0
+    final startingWeekday = firstDayOfMonth.weekday % 7;
+
     final List<Widget> dayWidgets = [];
 
-    // Days of week headers
-    const daysOfWeek = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-    for (final day in daysOfWeek) {
+    // Weekday headers: S, M, T, W, T, F, S
+    const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    for (final day in weekdays) {
       dayWidgets.add(
         Center(
           child: Text(
             day,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               fontFamily: 'Roboto',
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
@@ -80,16 +161,16 @@ class _CalendarPanelState extends State<CalendarPanel> {
     }
 
     // Leading days from previous month
-    for (int i = startingWeekday - 2; i >= 0; i--) {
+    for (int i = startingWeekday - 1; i >= 0; i--) {
       final day = prevMonthDays - i;
       dayWidgets.add(
         Center(
           child: Text(
-            '$day',
+            day < 10 ? '0$day' : '$day',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               fontFamily: 'Roboto',
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.25),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
             ),
           ),
         ),
@@ -107,14 +188,16 @@ class _CalendarPanelState extends State<CalendarPanel> {
           currentDate.month == _selectedDate.month &&
           currentDate.day == _selectedDate.day;
 
+      final dayStr = day < 10 ? '0$day' : '$day';
+
       dayWidgets.add(
         InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(15),
           onTap: () => setState(() => _selectedDate = currentDate),
           child: Center(
             child: Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: isToday
                     ? colorScheme.primary
@@ -125,12 +208,12 @@ class _CalendarPanelState extends State<CalendarPanel> {
               ),
               alignment: Alignment.center,
               child: Text(
-                '$day',
+                dayStr,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: isToday || isSelected
                       ? FontWeight.w700
-                      : FontWeight.w400,
+                      : FontWeight.w600,
                   fontFamily: 'Roboto',
                   color: isToday
                       ? colorScheme.onPrimary
@@ -145,131 +228,169 @@ class _CalendarPanelState extends State<CalendarPanel> {
       );
     }
 
-    return Container(
-      width: 340,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.96),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+    // Trailing days from next month
+    final totalCells = dayWidgets.length - 7;
+    final remainingCells = (7 - (totalCells % 7)) % 7;
+    for (int day = 1; day <= remainingCells; day++) {
+      final dayStr = day < 10 ? '0$day' : '$day';
+      dayWidgets.add(
+        Center(
+          child: Text(
+            dayStr,
+            style: TextStyle(
+              fontSize: 12,
+              fontFamily: 'Roboto',
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+            ),
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Month Header & Navigation
-          Row(
-            children: [
-              Text(
-                monthFormat.format(_selectedMonth),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Top Header: Weekday & Full Date
+        Text(
+          weekdayName,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Roboto',
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          fullDateName,
+          style: TextStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Roboto',
+            color: colorScheme.onSurface,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Month Selector: < Month >
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Symbols.chevron_left_rounded,
+                fill: 1,
+                weight: 300,
+                grade: 0,
+              ),
+              iconSize: 20,
+              visualDensity: VisualDensity.compact,
+              onPressed: _prevMonth,
+            ),
+            GestureDetector(
+              onTap: _goToToday,
+              child: Text(
+                monthName,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),
               ),
-              const Spacer(),
-              // Today Button
-              InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: _goToToday,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text(
-                    'Today',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Roboto',
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: const Icon(
-                  Symbols.chevron_left_rounded,
-                  fill: 1,
-                  weight: 300,
-                  grade: 0,
-                ),
-                iconSize: 20,
-                visualDensity: VisualDensity.compact,
-                onPressed: _prevMonth,
-              ),
-              IconButton(
-                icon: const Icon(
-                  Symbols.chevron_right_rounded,
-                  fill: 1,
-                  weight: 300,
-                  grade: 0,
-                ),
-                iconSize: 20,
-                visualDensity: VisualDensity.compact,
-                onPressed: _nextMonth,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Calendar Grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 7,
-            mainAxisSpacing: 6,
-            crossAxisSpacing: 4,
-            children: dayWidgets,
-          ),
-
-          const SizedBox(height: 16),
-          Divider(
-            height: 1,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-          ),
-          const SizedBox(height: 12),
-
-          // Selected Date Info Card
-          Row(
-            children: [
-              Icon(
-                Symbols.event_note_rounded,
-                size: 20,
+            ),
+            IconButton(
+              icon: const Icon(
+                Symbols.chevron_right_rounded,
                 fill: 1,
                 weight: 300,
                 grade: 0,
-                color: colorScheme.primary,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  fullDateFormat.format(_selectedDate),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Roboto',
-                    color: colorScheme.onSurface,
-                  ),
+              iconSize: 20,
+              visualDensity: VisualDensity.compact,
+              onPressed: _nextMonth,
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 6),
+
+        // Calendar Grid
+        Expanded(
+          child: GridView.count(
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 7,
+            mainAxisSpacing: 3,
+            crossAxisSpacing: 3,
+            children: dayWidgets,
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        // Today / Agenda Card (GNOME style layout in MD3 container)
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Today',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Roboto',
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'No Events',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Roboto',
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // World Clocks Action Button (MD3 tonal style)
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {},
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                'Add World Clocks...',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Roboto',
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
