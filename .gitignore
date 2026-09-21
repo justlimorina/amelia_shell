@@ -46,3 +46,30 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Linux C++ Tooling & CMake
+compile_commands.json
+.clangd/
+.cache/
+cmake-build-*/
+*.cmake.cache
+
+# Linux Core Dumps & Crash Logs
+core
+core.*
+vgcore.*
+
+# Environment & Secret variables
+.env
+.env.*
+!.env.example
+
+# Linux Packaging artifacts
+*.deb
+*.ddeb
+*.changes
+*.buildinfo
+*.build
+.debhelper/
+debian/files
+debian/amelia-shell/
