@@ -55,8 +55,9 @@ cmake-build-*/
 *.cmake.cache
 
 # Linux Core Dumps & Crash Logs
-core
-core.*
+/core
+/core.*
+core.[0-9]*
 vgcore.*
 
 # Environment & Secret variables

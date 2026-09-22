@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/services/input_method_service.dart';
 import 'core/services/layer_shell_service.dart';
 import 'core/services/mpris_service.dart';
 import 'core/services/system_service.dart';
@@ -11,9 +12,10 @@ import 'features/shelf/shelf_widget.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Start system services (clock, battery, MPRIS media)
+  // Start system services (clock, battery, MPRIS media, IME)
   SystemService().start();
   MprisService().start();
+  InputMethodService().start();
 
   // Check if running under Wayland Layer Shell
   await LayerShellService.checkLayerSupport();

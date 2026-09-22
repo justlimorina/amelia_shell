@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import '../../core/services/input_method_service.dart';
 import '../../core/theme/theme.dart';
 import '../status_tray/date_pill.dart';
+import '../status_tray/input_method_pill.dart';
 import '../status_tray/status_tray_pill.dart';
 import 'shelf_app_button.dart';
 import 'shelf_app_item.dart';
@@ -67,12 +70,22 @@ class _ShelfWidgetState extends State<ShelfWidget> {
             ),
           ),
 
-          // 3. Right (End Edge): Date Pill & Status Tray Pill
+          // 3. Right (End Edge): Input Method, Date Pill & Status Tray Pill
           Positioned(
             right: 12,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                ValueListenableBuilder<InputMethodState>(
+                  valueListenable: InputMethodService().stateNotifier,
+                  builder: (context, state, _) {
+                    if (!state.isAvailable) return const SizedBox.shrink();
+                    return const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: InputMethodPill(),
+                    );
+                  },
+                ),
                 DatePill(
                   isOpen: widget.isCalendarOpen,
                   onTap: widget.onToggleCalendar,
@@ -119,44 +132,31 @@ class _LauncherButtonState extends State<_LauncherButton> {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           onTap: widget.onTap,
-          child: AnimatedContainer(
+          child: AnimatedScale(
+            scale: _isHovered ? 1.05 : 1.0,
             duration: const Duration(milliseconds: 180),
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: widget.isOpen
-                  ? colorScheme.primaryContainer
-                  : (_isHovered
-                      ? colorScheme.onSurface.withValues(alpha: 0.1)
-                      : Colors.transparent),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              // ChromeOS iconic concentric circle launcher icon
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: widget.isOpen
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurface,
-                    width: 2.2,
-                  ),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: widget.isOpen
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSurface,
-                    ),
-                  ),
-                ),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: widget.isOpen
+                    ? colorScheme.primaryContainer
+                    : (_isHovered
+                        ? colorScheme.onSurface.withValues(alpha: 0.08)
+                        : Colors.transparent),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Symbols.grid_view_rounded,
+                size: 20,
+                fill: 1,
+                weight: 300,
+                grade: 0,
+                color: widget.isOpen
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurface,
               ),
             ),
           ),

@@ -44,7 +44,7 @@ class _StatusTrayPillState extends State<StatusTrayPill> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           height: 38,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: widget.isOpen
                 ? colorScheme.primaryContainer

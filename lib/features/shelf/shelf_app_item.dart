@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class ShelfAppItem {
   final String id;
@@ -36,7 +37,7 @@ class ShelfAppItem {
       const ShelfAppItem(
         id: 'chrome',
         name: 'Google Chrome',
-        icon: Icons.language,
+        icon: Symbols.globe_rounded,
         iconColor: Color(0xFF4285F4),
         exec: 'google-chrome',
         isRunning: false,
@@ -44,7 +45,7 @@ class ShelfAppItem {
       const ShelfAppItem(
         id: 'terminal',
         name: 'Terminal',
-        icon: Icons.terminal,
+        icon: Symbols.terminal_rounded,
         iconColor: Color(0xFF34A853),
         exec: 'x-terminal-emulator',
         isRunning: true,
@@ -52,7 +53,7 @@ class ShelfAppItem {
       const ShelfAppItem(
         id: 'files',
         name: 'Files',
-        icon: Icons.folder,
+        icon: Symbols.folder_rounded,
         iconColor: Color(0xFFFBBC05),
         exec: 'nautilus',
         isRunning: false,
@@ -60,7 +61,7 @@ class ShelfAppItem {
       const ShelfAppItem(
         id: 'editor',
         name: 'Text Editor',
-        icon: Icons.edit_note,
+        icon: Symbols.edit_note_rounded,
         iconColor: Color(0xFFEA4335),
         exec: 'gnome-text-editor',
         isRunning: false,

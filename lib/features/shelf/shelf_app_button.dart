@@ -37,42 +37,47 @@ class _ShelfAppButtonState extends State<ShelfAppButton> {
               widget.item.launch();
             }
           },
-          child: AnimatedContainer(
+          child: AnimatedScale(
+            scale: _isHovered ? 1.06 : 1.0,
             duration: const Duration(milliseconds: 180),
             curve: Curves.easeOutCubic,
-            width: 44,
-            height: 44,
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            decoration: BoxDecoration(
-              color: _isHovered
-                  ? colorScheme.onSurface.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Icon
-                Icon(
-                  widget.item.icon,
-                  size: 24,
-                  color: widget.item.iconColor,
-                ),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              width: 48,
+              height: 48,
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                color: _isHovered
+                    ? colorScheme.onSurface.withValues(alpha: 0.08)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Icon
+                  Icon(
+                    widget.item.icon,
+                    size: 26,
+                    color: widget.item.iconColor,
+                  ),
 
-                // Running indicator dot (ChromeOS style)
-                if (widget.item.isRunning)
-                  Positioned(
-                    bottom: 2,
-                    child: Container(
-                      width: 5,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
+                  // Running indicator dot (ChromeOS style)
+                  if (widget.item.isRunning)
+                    Positioned(
+                      bottom: 3,
+                      child: Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
