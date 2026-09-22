@@ -12,18 +12,22 @@ class ShelfWidget extends StatefulWidget {
   final bool isLauncherOpen;
   final bool isCalendarOpen;
   final bool isQuickSettingsOpen;
+  final bool isImeMenuOpen;
   final VoidCallback onToggleLauncher;
   final VoidCallback onToggleCalendar;
   final VoidCallback onToggleQuickSettings;
+  final VoidCallback onToggleImeMenu;
 
   const ShelfWidget({
     super.key,
     required this.isLauncherOpen,
     required this.isCalendarOpen,
     required this.isQuickSettingsOpen,
+    required this.isImeMenuOpen,
     required this.onToggleLauncher,
     required this.onToggleCalendar,
     required this.onToggleQuickSettings,
+    required this.onToggleImeMenu,
   });
 
   @override
@@ -80,9 +84,12 @@ class _ShelfWidgetState extends State<ShelfWidget> {
                   valueListenable: InputMethodService().stateNotifier,
                   builder: (context, state, _) {
                     if (!state.isAvailable) return const SizedBox.shrink();
-                    return const Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: InputMethodPill(),
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InputMethodPill(
+                        isOpen: widget.isImeMenuOpen,
+                        onTap: widget.onToggleImeMenu,
+                      ),
                     );
                   },
                 ),

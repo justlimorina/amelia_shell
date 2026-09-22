@@ -1,10 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "🔨 Building Amelia Shell for Linux..."
-flutter build linux --release
+MODE="debug"
+if [ "$1" == "release" ] || [ "$1" == "--release" ]; then
+  MODE="release"
+fi
+
+echo "🔨 Building Amelia Shell for Linux ($MODE)..."
+flutter build linux --$MODE
 
 echo "✅ Build complete!"
-echo "🚀 You can run the shell using:"
-echo "   ./build/linux/x64/release/bundle/amelia_shell"
-
+echo "🚀 Executable:"
+echo "   ./build/linux/x64/$MODE/bundle/amelia_shell"

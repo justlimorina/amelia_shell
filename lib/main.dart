@@ -8,6 +8,7 @@ import 'features/calendar/calendar_panel.dart';
 import 'features/launcher/launcher_panel.dart';
 import 'features/quick_settings/quick_settings_panel.dart';
 import 'features/shelf/shelf_widget.dart';
+import 'features/status_tray/input_method_panel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,13 +57,18 @@ class _ShellScreenState extends State<ShellScreen> {
   bool _isLauncherOpen = false;
   bool _isCalendarOpen = false;
   bool _isQuickSettingsOpen = false;
+  bool _isImeMenuOpen = false;
 
   void _closeAllOverlays() {
-    if (_isLauncherOpen || _isCalendarOpen || _isQuickSettingsOpen) {
+    if (_isLauncherOpen ||
+        _isCalendarOpen ||
+        _isQuickSettingsOpen ||
+        _isImeMenuOpen) {
       setState(() {
         _isLauncherOpen = false;
         _isCalendarOpen = false;
         _isQuickSettingsOpen = false;
+        _isImeMenuOpen = false;
       });
       // Shrink layer surface back to shelf height
       LayerShellService.setHeight(56);
@@ -75,6 +81,7 @@ class _ShellScreenState extends State<ShellScreen> {
       _isLauncherOpen = !_isLauncherOpen;
       _isCalendarOpen = false;
       _isQuickSettingsOpen = false;
+      _isImeMenuOpen = false;
     });
 
     if (_isLauncherOpen) {
@@ -90,6 +97,7 @@ class _ShellScreenState extends State<ShellScreen> {
       _isCalendarOpen = !_isCalendarOpen;
       _isLauncherOpen = false;
       _isQuickSettingsOpen = false;
+      _isImeMenuOpen = false;
     });
 
     if (_isCalendarOpen) {
@@ -105,6 +113,7 @@ class _ShellScreenState extends State<ShellScreen> {
       _isQuickSettingsOpen = !_isQuickSettingsOpen;
       _isLauncherOpen = false;
       _isCalendarOpen = false;
+      _isImeMenuOpen = false;
     });
 
     if (_isQuickSettingsOpen) {
@@ -115,10 +124,28 @@ class _ShellScreenState extends State<ShellScreen> {
     }
   }
 
+  void _toggleImeMenu() {
+    setState(() {
+      _isImeMenuOpen = !_isImeMenuOpen;
+      _isLauncherOpen = false;
+      _isCalendarOpen = false;
+      _isQuickSettingsOpen = false;
+    });
+
+    if (_isImeMenuOpen) {
+      LayerShellService.setHeight(360);
+      LayerShellService.setKeyboardMode(false);
+    } else {
+      LayerShellService.setHeight(56);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasOverlay =
-        _isLauncherOpen || _isCalendarOpen || _isQuickSettingsOpen;
+    final hasOverlay = _isLauncherOpen ||
+        _isCalendarOpen ||
+        _isQuickSettingsOpen ||
+        _isImeMenuOpen;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -164,16 +191,28 @@ class _ShellScreenState extends State<ShellScreen> {
               ),
             ),
 
-          // 5. Main Shelf (Anchored at Bottom Edge)
+          // 5. Input Method Popup (Anchored directly above InputMethodPill)
+          if (_isImeMenuOpen)
+            Positioned(
+              right: 180,
+              bottom: AmeliaTheme.shelfHeight + 8,
+              child: InputMethodPanel(
+                onClose: _closeAllOverlays,
+              ),
+            ),
+
+          // 6. Main Shelf (Anchored at Bottom Edge)
           Align(
             alignment: Alignment.bottomCenter,
             child: ShelfWidget(
               isLauncherOpen: _isLauncherOpen,
               isCalendarOpen: _isCalendarOpen,
               isQuickSettingsOpen: _isQuickSettingsOpen,
+              isImeMenuOpen: _isImeMenuOpen,
               onToggleLauncher: _toggleLauncher,
               onToggleCalendar: _toggleCalendar,
               onToggleQuickSettings: _toggleQuickSettings,
+              onToggleImeMenu: _toggleImeMenu,
             ),
           ),
         ],
