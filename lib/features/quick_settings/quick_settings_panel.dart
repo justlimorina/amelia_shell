@@ -8,7 +8,7 @@ import '../../core/services/system_service.dart';
 import '../../core/theme/theme.dart';
 import '../media_player/media_player_card.dart';
 
-enum QuickSettingsView { main, wifi, bluetooth, capture }
+enum QuickSettingsView { main, wifi, bluetooth }
 
 class BluetoothDevice {
   final String mac;
@@ -36,8 +36,13 @@ class AudioOutput {
 
 class QuickSettingsPanel extends StatefulWidget {
   final VoidCallback onClose;
+  final VoidCallback? onOpenCapture;
 
-  const QuickSettingsPanel({super.key, required this.onClose});
+  const QuickSettingsPanel({
+    super.key,
+    required this.onClose,
+    this.onOpenCapture,
+  });
 
   @override
   State<QuickSettingsPanel> createState() => _QuickSettingsPanelState();
@@ -65,7 +70,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
   bool _hasNmcli = true;
   bool _hasBluetoothctl = true;
   bool _hasGrim = true;
-  bool _hasSlurp = true;
   bool _hasGammastep = true;
   bool _hasWlsunset = false;
   String? _dndTool; // 'dunstctl' | 'swaync-client' | null
@@ -102,7 +106,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
     _hasNmcli = await _toolExists('nmcli');
     _hasBluetoothctl = await _toolExists('bluetoothctl');
     _hasGrim = await _toolExists('grim');
-    _hasSlurp = await _toolExists('slurp');
     _hasGammastep = await _toolExists('gammastep');
     _hasWlsunset = await _toolExists('wlsunset');
 
@@ -143,21 +146,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
     if (mounted) {
       setState(() => _bluetoothEnabled = powered);
     }
-  }
-
-  String _screenshotPath() {
-    final home = Platform.environment['HOME'] ?? '.';
-    final dir = Directory('$home/Pictures');
-    if (!dir.existsSync()) {
-      dir.createSync(recursive: true);
-    }
-    final stamp =
-        '${DateTime.now().year}_${DateTime.now().month.toString().padLeft(2, '0')}_'
-        '${DateTime.now().day.toString().padLeft(2, '0')}_'
-        '${DateTime.now().hour.toString().padLeft(2, '0')}'
-        '${DateTime.now().minute.toString().padLeft(2, '0')}'
-        '${DateTime.now().second.toString().padLeft(2, '0')}';
-    return '${dir.path}/Screenshot_$stamp.png';
   }
 
   // ---------------------------------------------------------------------------
@@ -249,12 +237,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
     }
   }
 
-  void _openCaptureSubmenu() {
-    setState(() {
-      _currentView = QuickSettingsView.capture;
-    });
-  }
-
   Future<void> _scanWifi() async {
     setState(() => _isScanningWifi = true);
     final networks = await NetworkService().scanWifi();
@@ -308,32 +290,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
       await _run('bluetoothctl', ['connect', device.mac]);
     }
     _loadBluetoothDevices();
-  }
-
-  Future<void> _captureFullScreen() async {
-    final path = _screenshotPath();
-    final r = await _run('grim', [path]);
-    if (r != null && r.exitCode == 0) {
-      await _run('notify-send', ['Screenshot saved', path]);
-    }
-    if (!mounted) return;
-    setState(() => _currentView = QuickSettingsView.main);
-  }
-
-  Future<void> _captureRegion() async {
-    if (!_hasSlurp) return;
-    final geo = await _run('slurp', []);
-    if (geo == null || geo.exitCode != 0) return; // cancelled by user
-    final geometry = geo.stdout.toString().trim();
-    if (geometry.isEmpty) return;
-
-    final path = _screenshotPath();
-    final r = await _run('grim', ['-g', geometry, path]);
-    if (r != null && r.exitCode == 0) {
-      await _run('notify-send', ['Screenshot saved', path]);
-    }
-    if (!mounted) return;
-    setState(() => _currentView = QuickSettingsView.main);
   }
 
   Future<List<AudioOutput>> _loadAudioOutputs() async {
@@ -494,8 +450,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
         return _buildWifiSubmenu(context);
       case QuickSettingsView.bluetooth:
         return _buildBluetoothSubmenu(context);
-      case QuickSettingsView.capture:
-        return _buildCaptureSubmenu(context);
       case QuickSettingsView.main:
         return _buildMainView(context);
     }
@@ -802,15 +756,18 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
           onSubmenu: _openBluetoothSubmenu,
         ),
 
-      // Screen capture (grim for full screen, + slurp for region)
+      // Screen capture (GNOME-style toolbar with Selection/Screen/Window)
       if (_hasGrim)
         _FeaturePod(
           icon: Symbols.screenshot_monitor_rounded,
           title: 'Screen capture',
           isActive: false,
-          hasSubmenu: true,
-          onToggle: _openCaptureSubmenu,
-          onSubmenu: _openCaptureSubmenu,
+          onToggle: () {
+            if (widget.onOpenCapture != null) {
+              widget.onClose();
+              widget.onOpenCapture!();
+            }
+          },
         ),
 
       // Do not disturb (dunst/swaync)
@@ -1199,64 +1156,6 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
       ],
     );
   }
-
-  Widget _buildCaptureSubmenu(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      key: const ValueKey('capture_submenu'),
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(
-                Symbols.arrow_back_rounded,
-                fill: 1,
-                weight: 300,
-                grade: 0,
-              ),
-              iconSize: 20,
-              visualDensity: VisualDensity.compact,
-              onPressed: () =>
-                  setState(() => _currentView = QuickSettingsView.main),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Screen capture',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Roboto',
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Divider(
-          height: 1,
-          color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-        ),
-        const SizedBox(height: 12),
-
-        _CaptureOption(
-          icon: Symbols.screenshot_monitor_rounded,
-          title: 'Full screen',
-          subtitle: 'Capture every display',
-          onTap: _captureFullScreen,
-        ),
-        if (_hasSlurp)
-          _CaptureOption(
-            icon: Symbols.crop_rounded,
-            title: 'Region',
-            subtitle: 'Drag to select an area',
-            onTap: _captureRegion,
-          ),
-      ],
-    );
-  }
 }
 
 /// ChromeOS Circular Action Button (Top bar)
@@ -1439,100 +1338,6 @@ class _FeaturePodState extends State<_FeaturePod> {
                   ),
                 ),
               ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// One selectable capture mode inside the Screen capture submenu.
-class _CaptureOption extends StatefulWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _CaptureOption({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  State<_CaptureOption> createState() => _CaptureOptionState();
-}
-
-class _CaptureOptionState extends State<_CaptureOption> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? colorScheme.surfaceContainerHighest
-                : colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                widget.icon,
-                size: 22,
-                fill: 1,
-                weight: 300,
-                grade: 0,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.title,
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.subtitle,
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 11,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Icon(
-                Symbols.chevron_right_rounded,
-                size: 18,
-                color: colorScheme.onSurfaceVariant,
-              ),
             ],
           ),
         ),

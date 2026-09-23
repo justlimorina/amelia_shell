@@ -7,6 +7,7 @@ import 'core/theme/theme.dart';
 import 'features/calendar/calendar_panel.dart';
 import 'features/launcher/launcher_panel.dart';
 import 'features/quick_settings/quick_settings_panel.dart';
+import 'features/screen_capture/capture_toolbar.dart';
 import 'features/shelf/shelf_widget.dart';
 import 'features/status_tray/input_method_panel.dart';
 
@@ -58,22 +59,43 @@ class _ShellScreenState extends State<ShellScreen> {
   bool _isCalendarOpen = false;
   bool _isQuickSettingsOpen = false;
   bool _isImeMenuOpen = false;
+  bool _isCaptureToolbarOpen = false;
 
   void _closeAllOverlays() {
     if (_isLauncherOpen ||
         _isCalendarOpen ||
         _isQuickSettingsOpen ||
-        _isImeMenuOpen) {
+        _isImeMenuOpen ||
+        _isCaptureToolbarOpen) {
       setState(() {
         _isLauncherOpen = false;
         _isCalendarOpen = false;
         _isQuickSettingsOpen = false;
         _isImeMenuOpen = false;
+        _isCaptureToolbarOpen = false;
       });
       // Shrink layer surface back to shelf height
       LayerShellService.setHeight(56);
       LayerShellService.setKeyboardMode(false);
     }
+  }
+
+  void _openCaptureToolbar() {
+    setState(() {
+      _isCaptureToolbarOpen = true;
+      _isLauncherOpen = false;
+      _isCalendarOpen = false;
+      _isQuickSettingsOpen = false;
+      _isImeMenuOpen = false;
+    });
+    // Make the layer surface tall enough to float the toolbar at the top.
+    LayerShellService.setHeight(800);
+    LayerShellService.setKeyboardMode(false);
+  }
+
+  void _closeCaptureToolbar() {
+    setState(() => _isCaptureToolbarOpen = false);
+    LayerShellService.setHeight(56);
   }
 
   void _toggleLauncher() {
@@ -145,7 +167,8 @@ class _ShellScreenState extends State<ShellScreen> {
     final hasOverlay = _isLauncherOpen ||
         _isCalendarOpen ||
         _isQuickSettingsOpen ||
-        _isImeMenuOpen;
+        _isImeMenuOpen ||
+        _isCaptureToolbarOpen;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -188,6 +211,7 @@ class _ShellScreenState extends State<ShellScreen> {
               bottom: AmeliaTheme.shelfHeight + 8,
               child: QuickSettingsPanel(
                 onClose: _closeAllOverlays,
+                onOpenCapture: _openCaptureToolbar,
               ),
             ),
 
@@ -201,7 +225,18 @@ class _ShellScreenState extends State<ShellScreen> {
               ),
             ),
 
-          // 6. Main Shelf (Anchored at Bottom Edge)
+          // 6. GNOME-style Screen Capture Toolbar (floats top-center)
+          if (_isCaptureToolbarOpen)
+            Positioned(
+              top: 24,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: CaptureToolbar(onClose: _closeCaptureToolbar),
+              ),
+            ),
+
+          // 7. Main Shelf (Anchored at Bottom Edge)
           Align(
             alignment: Alignment.bottomCenter,
             child: ShelfWidget(
