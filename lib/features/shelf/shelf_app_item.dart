@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class ShelfAppItem {
   final String id;
   final String name;
-  final IconData icon;
-  final Color iconColor;
+  final String iconName;
   final String exec;
   final bool isRunning;
   final bool isPinned;
@@ -14,8 +12,7 @@ class ShelfAppItem {
   const ShelfAppItem({
     required this.id,
     required this.name,
-    required this.icon,
-    this.iconColor = Colors.white,
+    required this.iconName,
     required this.exec,
     this.isRunning = false,
     this.isPinned = true,
@@ -37,36 +34,31 @@ class ShelfAppItem {
       const ShelfAppItem(
         id: 'chrome',
         name: 'Google Chrome',
-        icon: Symbols.globe_rounded,
-        iconColor: Color(0xFF4285F4),
+        iconName: 'google-chrome',
         exec: 'google-chrome',
         isRunning: false,
       ),
       const ShelfAppItem(
         id: 'terminal',
         name: 'Terminal',
-        icon: Symbols.terminal_rounded,
-        iconColor: Color(0xFF34A853),
+        iconName: 'utilities-terminal',
         exec: 'x-terminal-emulator',
         isRunning: true,
       ),
       const ShelfAppItem(
         id: 'files',
         name: 'Files',
-        icon: Symbols.folder_rounded,
-        iconColor: Color(0xFFFBBC05),
+        iconName: 'system-file-manager',
         exec: 'nautilus',
         isRunning: false,
       ),
       const ShelfAppItem(
         id: 'editor',
         name: 'Text Editor',
-        icon: Symbols.edit_note_rounded,
-        iconColor: Color(0xFFEA4335),
+        iconName: 'accessories-text-editor',
         exec: 'gnome-text-editor',
         isRunning: false,
       ),
     ];
   }
 }
-

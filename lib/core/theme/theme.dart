@@ -21,19 +21,32 @@ class AmeliaTheme {
   static const double shelfPadding = 6.0;
   static const double shelfIconSize = 26.0;
 
-  // Signature ChromeOS / Material 3 Google Blue seed
-  static const Color seedColor = Color(0xFF0B57D0);
+  // Signature ChromeOS / Material You Google Blue seeds
+  static const Color seedColor = Color(0xFF8AB4F8);
 
   static ThemeData darkTheme() {
-    final colorScheme = ColorScheme.fromSeed(
+    final baseScheme = ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,
+    );
+
+    final colorScheme = baseScheme.copyWith(
+      primary: const Color(0xFF8AB4F8),
+      onPrimary: const Color(0xFF041E49),
+      primaryContainer: const Color(0xFF1E3A5F),
+      onPrimaryContainer: const Color(0xFFD3E3FD),
+      surface: const Color(0xFF1B1B1F),
+      surfaceContainer: const Color(0xFF222428),
+      surfaceContainerHigh: const Color(0xFF2A2B30),
+      surfaceContainerHighest: const Color(0xFF35373D),
+      outlineVariant: const Color(0xFF44474E),
     );
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: colorScheme,
+      scaffoldBackgroundColor: Colors.transparent,
       fontFamily: 'Roboto',
       iconTheme: const IconThemeData(
         fill: 1.0,
@@ -61,15 +74,16 @@ class AmeliaTheme {
   }
 
   static ThemeData lightTheme() {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
+    final baseScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF1A73E8),
       brightness: Brightness.light,
     );
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: colorScheme,
+      colorScheme: baseScheme,
+      scaffoldBackgroundColor: Colors.transparent,
       fontFamily: 'Roboto',
       iconTheme: const IconThemeData(
         fill: 1.0,
@@ -78,15 +92,15 @@ class AmeliaTheme {
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
+          color: baseScheme.surfaceContainerHighest,
           borderRadius: const BorderRadius.all(Radius.circular(8)),
           border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+            color: baseScheme.outlineVariant.withValues(alpha: 0.4),
             width: 1,
           ),
         ),
         textStyle: TextStyle(
-          color: colorScheme.onSurface,
+          color: baseScheme.onSurface,
           fontSize: 12,
           fontWeight: FontWeight.w500,
           fontFamily: 'Roboto',

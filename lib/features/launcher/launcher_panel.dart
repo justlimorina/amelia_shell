@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/app_launcher_service.dart';
+import '../shelf/app_icon_widget.dart';
 import '../../core/services/layer_shell_service.dart';
 
 class LauncherPanel extends StatefulWidget {
@@ -228,18 +229,16 @@ class _AppGridTileState extends State<_AppGridTile> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Circular icon container
-              Container(
+              // Genuine Desktop Icon (SVG / PNG from Papirus / system)
+              SizedBox(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
-                  color: widget.app.getIconColor().withValues(alpha: 0.18),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.app.getFallbackIcon(),
-                  size: 26,
-                  color: widget.app.getIconColor(),
+                child: Center(
+                  child: AppIconWidget(
+                    iconName: widget.app.iconName,
+                    appName: widget.app.name,
+                    size: 42,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

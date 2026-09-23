@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_icon_widget.dart';
 import 'shelf_app_item.dart';
 
 class ShelfAppButton extends StatefulWidget {
@@ -56,11 +57,11 @@ class _ShelfAppButtonState extends State<ShelfAppButton> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Icon
-                  Icon(
-                    widget.item.icon,
-                    size: 26,
-                    color: widget.item.iconColor,
+                  // Authentic desktop icon (Papirus / hicolor / pixmaps)
+                  AppIconWidget(
+                    iconName: widget.item.iconName,
+                    appName: widget.item.name,
+                    size: 28,
                   ),
 
                   // Running indicator dot (ChromeOS style)
@@ -85,4 +86,3 @@ class _ShelfAppButtonState extends State<ShelfAppButton> {
     );
   }
 }
-

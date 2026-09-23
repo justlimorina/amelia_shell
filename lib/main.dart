@@ -117,7 +117,7 @@ class _ShellScreenState extends State<ShellScreen> {
     });
 
     if (_isQuickSettingsOpen) {
-      LayerShellService.setHeight(600);
+      LayerShellService.setHeight(640);
       LayerShellService.setKeyboardMode(false);
     } else {
       LayerShellService.setHeight(56);
