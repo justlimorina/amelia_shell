@@ -66,11 +66,12 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
   List<BluetoothDevice> _bluetoothDevices = [];
   bool _isLoadingBluetooth = false;
 
-  // Tool availability (detected once; pods are hidden when the tool is missing).
-  bool _hasNmcli = true;
-  bool _hasBluetoothctl = true;
-  bool _hasGrim = true;
-  bool _hasGammastep = true;
+  // Tool availability (detected synchronously in initState so the first frame
+  // is already correct; pods are hidden when the tool is missing).
+  bool _hasNmcli = false;
+  bool _hasBluetoothctl = false;
+  bool _hasGrim = false;
+  bool _hasGammastep = false;
   bool _hasWlsunset = false;
   String? _dndTool; // 'dunstctl' | 'swaync-client' | null
 
@@ -92,39 +93,52 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
     }
   }
 
-  Future<bool> _toolExists(String tool) async {
+  /// Synchronous tool probe so the pod grid is correct on the very first
+  /// frame - an async probe caused a visible "full menu -> 4 pods" blink.
+  bool _toolExistsSync(String tool) {
     try {
-      final r = await Process.run('sh', ['-c', 'command -v $tool']);
-      final out = r.stdout?.toString().trim() ?? '';
-      return r.exitCode == 0 && out.isNotEmpty;
-    } catch (_) {
-      return false;
+      final r = Process.runSync('sh', ['-c', 'command -v $tool']);
+      final out = (r.stdout as String?)?.trim() ?? '';
+      if (out.isNotEmpty) return true;
+    } catch (_) {}
+    // Fallback: the app process may have a minimal PATH (e.g. launched from
+    // a compositor autostart), so also check common bin directories directly.
+    const prefixes = [
+      '/usr/local/sbin',
+      '/usr/local/bin',
+      '/usr/sbin',
+      '/usr/bin',
+      '/sbin',
+      '/bin',
+      '/opt/local/bin',
+    ];
+    for (final prefix in prefixes) {
+      try {
+        if (File('$prefix/$tool').existsSync()) return true;
+      } catch (_) {}
     }
+    return false;
   }
 
-  Future<void> _detectTools() async {
-    _hasNmcli = await _toolExists('nmcli');
-    _hasBluetoothctl = await _toolExists('bluetoothctl');
-    _hasGrim = await _toolExists('grim');
-    _hasGammastep = await _toolExists('gammastep');
-    _hasWlsunset = await _toolExists('wlsunset');
+  void _detectTools() {
+    _hasNmcli = _toolExistsSync('nmcli');
+    _hasBluetoothctl = _toolExistsSync('bluetoothctl');
+    _hasGrim = _toolExistsSync('grim');
+    _hasGammastep = _toolExistsSync('gammastep');
+    _hasWlsunset = _toolExistsSync('wlsunset');
 
-    final hasDunst = await _toolExists('dunstctl');
-    final hasSwaync = await _toolExists('swaync-client');
-    _dndTool = hasDunst
+    _dndTool = _toolExistsSync('dunstctl')
         ? 'dunstctl'
-        : hasSwaync
+        : _toolExistsSync('swaync-client')
             ? 'swaync-client'
             : null;
 
     if (_hasNmcli) {
-      await _checkWifiState();
+      _checkWifiState();
     }
     if (_hasBluetoothctl) {
-      await _loadBluetoothState();
+      _loadBluetoothState();
     }
-
-    if (mounted) setState(() {});
   }
 
   Future<void> _checkWifiState() async {
@@ -572,6 +586,8 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
 
         // 2. Feature Pods Grid (3 columns, ChromeOS style).
         // Only pods whose backing tool is installed are shown - no fake toggles.
+        // Tool detection runs synchronously in initState, so the grid built on
+        // the first frame already matches the real tools (no flicker/rebuild).
         _buildPodGrid(),
 
         const SizedBox(height: 16),
@@ -763,9 +779,15 @@ class _QuickSettingsPanelState extends State<QuickSettingsPanel> {
           title: 'Screen capture',
           isActive: false,
           onToggle: () {
+            // Do NOT call onClose() before onOpenCapture() here: that sent
+            // setHeight(56) + setHeight(800) back-to-back and the pair got
+            // coalesced away by the compositor (toolbar stayed hidden behind
+            // the shelf until the next resize). onOpenCapture closes the
+            // panel state and issues a single resize in one setState.
             if (widget.onOpenCapture != null) {
-              widget.onClose();
               widget.onOpenCapture!();
+            } else {
+              widget.onClose();
             }
           },
         ),

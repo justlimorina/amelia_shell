@@ -145,7 +145,7 @@ class _LauncherPanelState extends State<LauncherPanel> {
               _searchQuery.isEmpty ? 'All Applications' : 'Search Results',
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 fontFamily: 'Roboto',
                 color: colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,
@@ -250,7 +250,7 @@ class _AppGridTileState extends State<_AppGridTile> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),

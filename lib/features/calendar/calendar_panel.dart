@@ -113,7 +113,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
           'No Notifications',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             fontFamily: 'Roboto',
             color: colorScheme.onSurfaceVariant,
             letterSpacing: 0.2,
@@ -151,7 +151,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
             day,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               fontFamily: 'Roboto',
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
@@ -212,8 +212,8 @@ class _CalendarPanelState extends State<CalendarPanel> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isToday || isSelected
-                      ? FontWeight.w700
-                      : FontWeight.w600,
+                      ? FontWeight.w500
+                      : FontWeight.w400,
                   fontFamily: 'Roboto',
                   color: isToday
                       ? colorScheme.onPrimary
@@ -255,7 +255,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
           weekdayName,
           style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
             fontFamily: 'Roboto',
             color: colorScheme.onSurfaceVariant,
           ),
@@ -265,7 +265,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
           fullDateName,
           style: TextStyle(
             fontSize: 19,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             fontFamily: 'Roboto',
             color: colorScheme.onSurface,
           ),
@@ -294,7 +294,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                 monthName,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),
@@ -344,7 +344,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                 'Today',
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),
@@ -382,7 +382,7 @@ class _CalendarPanelState extends State<CalendarPanel> {
                 'Add World Clocks...',
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   fontFamily: 'Roboto',
                   color: colorScheme.onSurface,
                 ),

@@ -88,13 +88,15 @@ class _ShellScreenState extends State<ShellScreen> {
       _isQuickSettingsOpen = false;
       _isImeMenuOpen = false;
     });
-    // Make the layer surface tall enough to float the toolbar at the top.
-    LayerShellService.setHeight(800);
+    // Floats right above shelf at bottom-center (GNOME style)
+    LayerShellService.setHeight(140);
     LayerShellService.setKeyboardMode(false);
   }
 
   void _closeCaptureToolbar() {
-    setState(() => _isCaptureToolbarOpen = false);
+    setState(() {
+      _isCaptureToolbarOpen = false;
+    });
     LayerShellService.setHeight(56);
   }
 
@@ -225,14 +227,16 @@ class _ShellScreenState extends State<ShellScreen> {
               ),
             ),
 
-          // 6. GNOME-style Screen Capture Toolbar (floats top-center)
+          // 6. GNOME-style Screen Capture Toolbar (floats bottom-center right above shelf)
           if (_isCaptureToolbarOpen)
             Positioned(
-              top: 24,
+              bottom: AmeliaTheme.shelfHeight + 14,
               left: 0,
               right: 0,
               child: Center(
-                child: CaptureToolbar(onClose: _closeCaptureToolbar),
+                child: CaptureToolbar(
+                  onClose: _closeCaptureToolbar,
+                ),
               ),
             ),
 

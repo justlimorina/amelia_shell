@@ -10,7 +10,30 @@ enum CaptureMode { selection, screen, window }
 class CaptureToolbar extends StatefulWidget {
   final VoidCallback onClose;
 
-  const CaptureToolbar({super.key, required this.onClose});
+  /// Status text rendered in the toolbar (e.g. "Saved: ..." or an error),
+  /// set by the parent when it re-opens the toolbar after a capture attempt.
+  final String? initialStatus;
+  final bool initialStatusIsError;
+
+  /// Called after a capture attempt with the result, so the parent can
+  /// re-open the toolbar to show the outcome (it is closed during capture).
+  final void Function(String message, bool isError)? onCaptureFinished;
+
+  /// Optional injected capture service (defaults to [ScreenCaptureService]).
+  final ScreenCaptureService? service;
+
+  /// Whether to fire system notifications via notify-send.
+  final bool enableNotifications;
+
+  const CaptureToolbar({
+    super.key,
+    required this.onClose,
+    this.initialStatus,
+    this.initialStatusIsError = false,
+    this.onCaptureFinished,
+    this.service,
+    this.enableNotifications = true,
+  });
 
   @override
   State<CaptureToolbar> createState() => _CaptureToolbarState();
@@ -18,38 +41,59 @@ class CaptureToolbar extends StatefulWidget {
 
 class _CaptureToolbarState extends State<CaptureToolbar> {
   CaptureMode _mode = CaptureMode.screen;
-  final ScreenCaptureService _service = ScreenCaptureService();
+  bool _busy = false;
+  ScreenCaptureService get _service => widget.service ?? ScreenCaptureService();
 
-  Future<void> _run(String cmd, List<String> args) async {
+  Future<void> _notifySaved(String path) async {
+    if (!widget.enableNotifications) return;
     try {
-      await Process.run(cmd, args);
+      final fileName = path.split('/').last;
+      await Process.run('notify-send', [
+        '-i',
+        path,
+        'Screenshot saved',
+        'Saved to $fileName',
+      ]).catchError((_) => ProcessResult(0, 0, '', ''));
     } catch (_) {
-      // not installed - ignore
+      // no notification daemon / notify-send - best effort
     }
+  }
+
+  Future<void> _notifyFailed(String err) async {
+    if (!widget.enableNotifications) return;
+    try {
+      await Process.run('notify-send', [
+        'Screenshot failed',
+        err,
+      ]).catchError((_) => ProcessResult(0, 0, '', ''));
+    } catch (_) {}
   }
 
   Future<void> _take() async {
-    switch (_mode) {
-      case CaptureMode.selection:
-      case CaptureMode.window:
-        // Hide the toolbar (and shrink the layer surface) so slurp/grim can
-        // see the real desktop, then capture.
-        widget.onClose();
-        await Future<void>.delayed(const Duration(milliseconds: 80));
-        final path = _mode == CaptureMode.selection
-            ? await _service.captureRegion()
-            : await _service.captureFocusedWindow();
-        await _notify(path);
-      case CaptureMode.screen:
-        final path = await _service.captureFull();
-        await _notify(path);
-        widget.onClose();
-    }
-  }
+    if (_busy) return;
+    _busy = true;
 
-  Future<void> _notify(String? path) async {
-    if (path == null) return;
-    await _run('notify-send', ['Screenshot saved', path]);
+    // Hide toolbar so it is not visible in the screenshot and pointer grab is released
+    widget.onClose();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+
+    final CaptureResult result = switch (_mode) {
+      CaptureMode.screen => await _service.captureFull(),
+      CaptureMode.selection => await _service.captureRegion(),
+      CaptureMode.window => await _service.captureFocusedWindow(),
+    };
+
+    final path = result.path;
+    if (path != null) {
+      await _notifySaved(path);
+      widget.onCaptureFinished?.call('Saved: ${path.split('/').last}', false);
+    } else {
+      final err = result.error ?? 'Capture failed';
+      if (!err.toLowerCase().contains('cancel')) {
+        await _notifyFailed(err);
+      }
+      widget.onCaptureFinished?.call(err, true);
+    }
   }
 
   @override
@@ -76,6 +120,27 @@ class _CaptureToolbarState extends State<CaptureToolbar> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Result / error status shown when the parent re-opens the
+          // toolbar after a capture attempt.
+          if (widget.initialStatus != null) ...[
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 220),
+              child: Text(
+                widget.initialStatus!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: widget.initialStatusIsError
+                      ? colorScheme.error
+                      : colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
           _ModeButton(
             icon: Symbols.crop_rounded,
             label: 'Selection',
@@ -186,8 +251,8 @@ class _ModeButtonState extends State<_ModeButton> {
                   fontFamily: 'Roboto',
                   fontSize: 12,
                   fontWeight: widget.selected
-                      ? FontWeight.w600
-                      : FontWeight.w500,
+                      ? FontWeight.w500
+                      : FontWeight.w400,
                   color: fg,
                 ),
               ),

@@ -65,7 +65,7 @@ class AmeliaTheme {
         textStyle: TextStyle(
           color: colorScheme.onSurface,
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           fontFamily: 'Roboto',
         ),
         waitDuration: const Duration(milliseconds: 300),
@@ -102,7 +102,7 @@ class AmeliaTheme {
         textStyle: TextStyle(
           color: baseScheme.onSurface,
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           fontFamily: 'Roboto',
         ),
         waitDuration: const Duration(milliseconds: 300),

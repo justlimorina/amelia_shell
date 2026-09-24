@@ -19,7 +19,9 @@ void main() {
       ),
     );
 
-    // Give the one-time tool-detection a chance to finish and rebuild.
+    // Tool detection is synchronous in initState, so the grid is already built
+    // after the first pump. This extra pump lets any async Wi-Fi/Bluetooth
+    // state loading settle (it doesn't affect the pod layout).
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byType(QuickSettingsPanel), findsOneWidget);
