@@ -82,6 +82,37 @@ class ScreenCaptureService {
     }
   }
 
+  /// Copy image file at [path] to Wayland/X11 clipboard using wl-copy or xclip.
+  Future<bool> copyToClipboard(String path) async {
+    try {
+      final file = File(path);
+      if (!await file.exists()) return false;
+
+      // Try wl-copy first (Wayland standard)
+      try {
+        final p = await Process.start('wl-copy', ['-t', 'image/png']);
+        await file.openRead().pipe(p.stdin);
+        final code = await p.exitCode;
+        if (code == 0) return true;
+      } catch (_) {}
+
+      // Fallback: xclip
+      try {
+        final p = await Process.start('xclip', [
+          '-selection',
+          'clipboard',
+          '-t',
+          'image/png',
+          '-i',
+          path,
+        ]);
+        final code = await p.exitCode;
+        if (code == 0) return true;
+      } catch (_) {}
+    } catch (_) {}
+    return false;
+  }
+
   /// Capture the whole compositor.
   Future<CaptureResult> captureFull() async {
     final path = _newPathOrNull();
@@ -89,7 +120,10 @@ class ScreenCaptureService {
       return const CaptureResult.fail('Cannot write to Pictures folder');
     }
     final r = await _run('grim', [path]);
-    if (r.exitCode == 0) return CaptureResult.ok(path);
+    if (r.exitCode == 0) {
+      await copyToClipboard(path);
+      return CaptureResult.ok(path);
+    }
     return CaptureResult.fail(_failure('grim', r));
   }
 
@@ -118,7 +152,10 @@ class ScreenCaptureService {
       return const CaptureResult.fail('Cannot write to Pictures folder');
     }
     final r = await _run('grim', ['-g', geometry, path]);
-    if (r.exitCode == 0) return CaptureResult.ok(path);
+    if (r.exitCode == 0) {
+      await copyToClipboard(path);
+      return CaptureResult.ok(path);
+    }
     return CaptureResult.fail(_failure('grim', r));
   }
 
@@ -149,7 +186,10 @@ class ScreenCaptureService {
             return const CaptureResult.fail('Cannot write to Pictures folder');
           }
           final r = await _run('grim', ['-g', geometry, path]);
-          if (r.exitCode == 0) return CaptureResult.ok(path);
+          if (r.exitCode == 0) {
+            await copyToClipboard(path);
+            return CaptureResult.ok(path);
+          }
           return CaptureResult.fail(_failure('grim', r));
         } else {
           return const CaptureResult.fail('Selection cancelled');

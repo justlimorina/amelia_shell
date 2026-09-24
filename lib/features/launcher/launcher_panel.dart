@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../core/services/app_launcher_service.dart';
-import '../shelf/app_icon_widget.dart';
 import '../../core/services/layer_shell_service.dart';
+import '../../core/services/session_service.dart';
+import '../../core/utils/calculator_evaluator.dart';
+import '../shelf/app_icon_widget.dart';
 
 class LauncherPanel extends StatefulWidget {
   final VoidCallback onClose;
@@ -41,11 +44,43 @@ class _LauncherPanelState extends State<LauncherPanel> {
     super.dispose();
   }
 
+  void _handleSubmitted(
+    String val, {
+    CalculationResult? calcResult,
+    List<SessionAction>? sessionActions,
+    List<DesktopAppInfo>? filteredApps,
+  }) {
+    if (calcResult != null) {
+      Clipboard.setData(ClipboardData(text: calcResult.formattedResult));
+      widget.onClose();
+      return;
+    }
+
+    if (sessionActions != null && sessionActions.isNotEmpty) {
+      sessionActions.first.execute();
+      widget.onClose();
+      return;
+    }
+
+    if (filteredApps != null && filteredApps.isNotEmpty) {
+      filteredApps.first.launch();
+      widget.onClose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final allApps = AppLauncherService().installedApps;
+
+    final calcResult = _searchQuery.isNotEmpty
+        ? CalculatorEvaluator.tryEvaluate(_searchQuery)
+        : null;
+
+    final sessionActions = _searchQuery.isNotEmpty
+        ? SessionService.search(_searchQuery)
+        : const <SessionAction>[];
 
     final filteredApps = _searchQuery.isEmpty
         ? allApps
@@ -77,7 +112,7 @@ class _LauncherPanelState extends State<LauncherPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search Field (ChromeOS style)
+          // Search Field (ChromeOS Omnibar style)
           Container(
             height: 48,
             decoration: BoxDecoration(
@@ -92,16 +127,24 @@ class _LauncherPanelState extends State<LauncherPanel> {
               controller: _searchController,
               focusNode: _focusNode,
               onChanged: (val) => setState(() => _searchQuery = val),
+              onSubmitted: (val) => _handleSubmitted(
+                val,
+                calcResult: calcResult,
+                sessionActions: sessionActions,
+                filteredApps: filteredApps,
+              ),
               style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Roboto',
+                fontWeight: FontWeight.w400,
                 color: colorScheme.onSurface,
               ),
               decoration: InputDecoration(
-                hintText: 'Search your apps, web...',
+                hintText: 'Search apps, calculate, or system commands...',
                 hintStyle: TextStyle(
                   color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w400,
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(
@@ -136,9 +179,35 @@ class _LauncherPanelState extends State<LauncherPanel> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Label
+          // Calculator Result Card (if math expression detected)
+          if (calcResult != null) ...[
+            _CalculatorResultCard(
+              result: calcResult,
+              onTap: () {
+                Clipboard.setData(
+                  ClipboardData(text: calcResult.formattedResult),
+                );
+                widget.onClose();
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Session Action Tiles (if keywords like lock, reboot, shutdown match)
+          if (sessionActions.isNotEmpty) ...[
+            ...sessionActions.map((action) => _SessionActionTile(
+                  action: action,
+                  onTap: () {
+                    action.execute();
+                    widget.onClose();
+                  },
+                )),
+            const SizedBox(height: 10),
+          ],
+
+          // Section Header Label
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
@@ -155,15 +224,16 @@ class _LauncherPanelState extends State<LauncherPanel> {
 
           const SizedBox(height: 8),
 
-          // App Grid
+          // App Grid / Empty View
           Expanded(
-            child: filteredApps.isEmpty
+            child: filteredApps.isEmpty && calcResult == null && sessionActions.isEmpty
                 ? Center(
                     child: Text(
-                      'No applications found',
+                      'No applications or commands found',
                       style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
                         fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
                         fontSize: 14,
                       ),
                     ),
@@ -189,6 +259,189 @@ class _LauncherPanelState extends State<LauncherPanel> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CalculatorResultCard extends StatelessWidget {
+  final CalculationResult result;
+  final VoidCallback onTap;
+
+  const _CalculatorResultCard({
+    required this.result,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: 0.35),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Symbols.calculate_rounded,
+                size: 20,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    result.expression,
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    '= ${result.formattedResult}',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Symbols.content_copy_rounded,
+                    size: 14,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Copy',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionActionTile extends StatelessWidget {
+  final SessionAction action;
+  final VoidCallback onTap;
+
+  const _SessionActionTile({
+    required this.action,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.25),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                action.icon,
+                size: 18,
+                color: colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    action.title,
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    action.description,
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Symbols.arrow_forward_rounded,
+              size: 16,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
       ),
     );
   }

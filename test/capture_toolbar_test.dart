@@ -17,6 +17,9 @@ class FakeScreenCaptureService implements ScreenCaptureService {
 
   @override
   Future<CaptureResult> captureFocusedWindow() async => result;
+
+  @override
+  Future<bool> copyToClipboard(String path) async => true;
 }
 
 void main() {

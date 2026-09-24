@@ -49,10 +49,12 @@ class _CaptureToolbarState extends State<CaptureToolbar> {
     try {
       final fileName = path.split('/').last;
       await Process.run('notify-send', [
+        '-a',
+        'Amelia Shell',
         '-i',
         path,
         'Screenshot saved',
-        'Saved to $fileName',
+        'Saved to $fileName (copied to clipboard)',
       ]).catchError((_) => ProcessResult(0, 0, '', ''));
     } catch (_) {
       // no notification daemon / notify-send - best effort
