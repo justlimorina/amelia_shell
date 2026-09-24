@@ -102,6 +102,9 @@ static void my_application_activate(GApplication* application) {
     gtk_widget_set_size_request(GTK_WIDGET(window), -1, 56);
     gtk_layer_set_exclusive_zone(window, 56);
     gtk_layer_set_keyboard_mode(window, GTK_LAYER_SHELL_KEYBOARD_MODE_NONE);
+
+    // Map and display layer-shell surface immediately on Wayland compositor
+    gtk_widget_show(GTK_WIDGET(window));
   } else if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
