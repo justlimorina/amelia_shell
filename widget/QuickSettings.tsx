@@ -1,6 +1,6 @@
 import app from "ags/gtk3/app"
 import { Astal, Gtk, Gdk } from "ags/gtk3"
-import { createBinding, createState } from "ags"
+import { createBinding, createState, With } from "ags"
 import { execAsync } from "ags/process"
 import { createPoll } from "ags/time"
 import Network from "gi://AstalNetwork"
@@ -308,35 +308,35 @@ export default function QuickSettings() {
         </box>
 
         {/* Media Player Card (if media playing) */}
-        {activePlayer((p) =>
-          p ? (
-            <box class="qs-media-card" valign={Gtk.Align.CENTER}>
-              <icon icon="audio-x-generic-symbolic" class="media-art" />
-              <box vertical hexpand valign={Gtk.Align.CENTER}>
-                <label label={createBinding(p, "title")} class="media-title" xalign={0} ellipsize={3} />
-                <label label={createBinding(p, "artist")} class="media-artist" xalign={0} ellipsize={3} />
+        <With value={activePlayer}>
+          {(p) =>
+            p ? (
+              <box class="qs-media-card" valign={Gtk.Align.CENTER}>
+                <icon icon="audio-x-generic-symbolic" class="media-art" />
+                <box vertical hexpand valign={Gtk.Align.CENTER}>
+                  <label label={createBinding(p, "title")} class="media-title" xalign={0} ellipsize={3} />
+                  <label label={createBinding(p, "artist")} class="media-artist" xalign={0} ellipsize={3} />
+                </box>
+                <button class="media-ctrl-btn" onClicked={() => p.previous()}>
+                  <icon icon="media-skip-backward-symbolic" class="ctrl-icon" />
+                </button>
+                <button class="media-ctrl-btn" onClicked={() => p.play_pause()}>
+                  <icon
+                    icon={createBinding(p, "playback_status")((s) =>
+                      s === Mpris.PlaybackStatus.PLAYING
+                        ? "media-playback-pause-symbolic"
+                        : "media-playback-start-symbolic"
+                    )}
+                    class="ctrl-icon"
+                  />
+                </button>
+                <button class="media-ctrl-btn" onClicked={() => p.next()}>
+                  <icon icon="media-skip-forward-symbolic" class="ctrl-icon" />
+                </button>
               </box>
-              <button class="media-ctrl-btn" onClicked={() => p.previous()}>
-                <icon icon="media-skip-backward-symbolic" class="ctrl-icon" />
-              </button>
-              <button class="media-ctrl-btn" onClicked={() => p.play_pause()}>
-                <icon
-                  icon={createBinding(p, "playback_status")((s) =>
-                    s === Mpris.PlaybackStatus.PLAYING
-                      ? "media-playback-pause-symbolic"
-                      : "media-playback-start-symbolic"
-                  )}
-                  class="ctrl-icon"
-                />
-              </button>
-              <button class="media-ctrl-btn" onClicked={() => p.next()}>
-                <icon icon="media-skip-forward-symbolic" class="ctrl-icon" />
-              </button>
-            </box>
-          ) : (
-            <box />
-          )
-        )}
+            ) : null
+          }
+        </With>
       </box>
     </window>
   )

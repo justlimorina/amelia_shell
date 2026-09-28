@@ -1,6 +1,6 @@
 import app from "ags/gtk3/app"
 import { Astal, Gtk, Gdk } from "ags/gtk3"
-import { createState, createBinding } from "ags"
+import { createState, createBinding, With } from "ags"
 import Apps from "gi://AstalApps"
 
 export default function Launcher() {
@@ -77,72 +77,67 @@ export default function Launcher() {
             onChanged={(entry) => handleSearchChange(entry.text)}
             onActivate={handleEntryActivate}
           />
-          {query((q) =>
-            q ? (
-              <button
-                class="qs-icon-btn"
-                tooltipText="Clear search"
-                onClicked={() => handleSearchChange("")}
-              >
-                <icon icon="edit-clear-symbolic" class="btn-icon" />
-              </button>
-            ) : (
-              <box />
-            )
-          )}
+          <button
+            class="qs-icon-btn"
+            tooltipText="Clear search"
+            visible={query((q) => Boolean(q.trim()))}
+            onClicked={() => handleSearchChange("")}
+          >
+            <icon icon="edit-clear-symbolic" class="btn-icon" />
+          </button>
         </box>
 
         {/* Calculator Evaluation Result Card */}
-        {calcResult((res) =>
-          res !== null ? (
-            <box class="calculator-result-card" vertical>
-              <label label={query((q) => `${q} =`)} class="calc-query" xalign={0} />
-              <label label={res} class="calc-answer" xalign={0} />
-            </box>
-          ) : (
-            <box />
-          )
-        )}
+        <box
+          class="calculator-result-card"
+          vertical
+          visible={calcResult((res) => res !== null)}
+        >
+          <label label={query((q) => `${q} =`)} class="calc-query" xalign={0} />
+          <label label={calcResult((res) => res || "")} class="calc-answer" xalign={0} />
+        </box>
 
         {/* Scrollable Apps Grid */}
         <scrollable class="launcher-apps-scroll" vscroll={Gtk.PolicyType.AUTOMATIC} hscroll={Gtk.PolicyType.NEVER} hexpand vexpand>
           <box vertical spacing={6}>
-            {filteredApps((appList) => {
-              // Group into rows of 5 columns
-              const rows: Apps.Application[][] = []
-              for (let i = 0; i < appList.length; i += 5) {
-                rows.push(appList.slice(i, i + 5))
-              }
+            <With value={filteredApps}>
+              {(appList) => {
+                // Group into rows of 5 columns
+                const rows: Apps.Application[][] = []
+                for (let i = 0; i < appList.length; i += 5) {
+                  rows.push(appList.slice(i, i + 5))
+                }
 
-              return (
-                <box vertical spacing={6}>
-                  {rows.map((row) => (
-                    <box spacing={6} homogeneous>
-                      {row.map((appItem) => (
-                        <button
-                          class="app-grid-tile"
-                          tooltipText={appItem.name}
-                          onClicked={() => launchApp(appItem)}
-                        >
-                          <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-                            <icon
-                              icon={appItem.icon_name || "application-x-executable"}
-                              class="grid-app-icon"
-                            />
-                            <label
-                              label={appItem.name}
-                              class="grid-app-label"
-                              maxWidthChars={11}
-                              ellipsize={3}
-                            />
-                          </box>
-                        </button>
-                      ))}
-                    </box>
-                  ))}
-                </box>
-              )
-            })}
+                return (
+                  <box vertical spacing={6}>
+                    {rows.map((row) => (
+                      <box spacing={6} homogeneous>
+                        {row.map((appItem) => (
+                          <button
+                            class="app-grid-tile"
+                            tooltipText={appItem.name}
+                            onClicked={() => launchApp(appItem)}
+                          >
+                            <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
+                              <icon
+                                icon={appItem.icon_name || "application-x-executable"}
+                                class="grid-app-icon"
+                              />
+                              <label
+                                label={appItem.name}
+                                class="grid-app-label"
+                                maxWidthChars={11}
+                                ellipsize={3}
+                              />
+                            </box>
+                          </button>
+                        ))}
+                      </box>
+                    ))}
+                  </box>
+                )
+              }}
+            </With>
           </box>
         </scrollable>
       </box>
