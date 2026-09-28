@@ -1,0 +1,513 @@
+// Material Design 3 / Material You Design Tokens for ChromeOS Shell
+$font-family: "Roboto", sans-serif;
+
+// MD3 Tonal Dark Colors (Authentic Google ChromeOS Material You)
+$surface-base: #141218;
+$surface-dim: #110f14;
+$surface-container: rgba(33, 31, 38, 0.92);
+$surface-container-high: rgba(43, 41, 48, 0.96);
+$surface-container-highest: rgba(54, 52, 59, 0.98);
+
+$primary: #a8c7fa;                  // Google MD3 Blue 200
+$on-primary: #062e6f;               // Dark Blue on Primary
+$primary-container: #0842a0;
+$on-primary-container: #d3e3fd;
+
+$secondary-container: #334460;
+$on-secondary-container: #dbe3f6;
+
+$surface-variant: #44474f;
+$on-surface: #e3e2e6;
+$on-surface-variant: #c4c7c5;
+$outline: rgba(255, 255, 255, 0.08);
+$outline-focus: #a8c7fa;
+
+$active-pill: rgba(168, 199, 250, 0.20);
+$active-pill-text: #a8c7fa;
+$hover-tint: rgba(255, 255, 255, 0.06);
+$active-tint: rgba(255, 255, 255, 0.12);
+
+* {
+  all: unset;
+  font-family: $font-family;
+  font-size: 13px;
+  font-weight: 400; // Strictly Regular default
+  color: $on-surface;
+}
+
+// -------------------------------------------------------------
+// 1. SHELF (BOTTOM BAR)
+// -------------------------------------------------------------
+.Shelf {
+  background: rgba(18, 18, 20, 0.85);
+  border-top: 1px solid $outline;
+}
+
+.shelf-box {
+  min-height: 56px;
+  padding: 0 12px;
+}
+
+// Launcher button
+.shelf-launcher-btn {
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 9999px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    background-color: $hover-tint;
+  }
+  &:active {
+    background-color: $active-tint;
+  }
+
+  .launcher-icon {
+    font-size: 22px;
+    color: $on-surface;
+  }
+}
+
+// Pinned Apps
+.shelf-app-item {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  margin: 0 2px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    background-color: $hover-tint;
+  }
+  &:active {
+    background-color: $active-tint;
+  }
+
+  .app-icon {
+    font-size: 26px;
+  }
+}
+
+// Status Area Pills on the right of Shelf
+.shelf-pill {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  padding: 6px 14px;
+  margin-left: 8px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  &:active {
+    background-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .pill-icon {
+    font-size: 16px;
+    color: $on-surface;
+    margin-right: 6px;
+  }
+
+  .pill-label {
+    font-size: 13px;
+    font-weight: 500; // Medium for numbers / clock
+    color: $on-surface;
+  }
+
+  .pill-sublabel {
+    font-size: 12px;
+    font-weight: 400; // Regular for date text
+    color: $on-surface-variant;
+    margin-left: 6px;
+  }
+}
+
+// -------------------------------------------------------------
+// 2. QUICK SETTINGS POPUP
+// -------------------------------------------------------------
+.QuickSettingsWindow {
+  background: transparent;
+}
+
+.quicksettings-card {
+  background: $surface-container;
+  border: 1px solid $outline;
+  border-radius: 28px;
+  padding: 20px;
+  min-width: 360px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+// Header
+.qs-header {
+  margin-bottom: 16px;
+}
+
+.qs-user-pill {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  padding: 6px 12px;
+
+  .qs-user-avatar {
+    font-size: 18px;
+    color: $primary;
+    margin-right: 8px;
+  }
+  .qs-user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+}
+
+.qs-icon-btn {
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.06);
+  margin-left: 6px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+  }
+  &:active {
+    background-color: rgba(255, 255, 255, 0.20);
+  }
+
+  .btn-icon {
+    font-size: 16px;
+    color: $on-surface;
+  }
+}
+
+// Feature Pods Grid
+.qs-pods-grid {
+  margin-bottom: 16px;
+}
+
+.qs-pod {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 10px 12px;
+  min-height: 52px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+  }
+  &:active {
+    background-color: rgba(255, 255, 255, 0.16);
+  }
+
+  &.active {
+    background-color: $primary;
+    border-color: transparent;
+
+    .pod-icon, .pod-title {
+      color: $on-primary;
+    }
+    .pod-subtitle {
+      color: rgba(6, 46, 111, 0.8);
+    }
+  }
+
+  .pod-icon {
+    font-size: 20px;
+    color: $on-surface;
+    margin-right: 10px;
+  }
+
+  .pod-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+
+  .pod-subtitle {
+    font-size: 11px;
+    font-weight: 400; // Strictly Regular
+    color: $on-surface-variant;
+    margin-top: 2px;
+  }
+}
+
+// Sliders (Volume, Brightness)
+.qs-slider-row {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  padding: 4px 14px;
+  margin-bottom: 10px;
+
+  .slider-leading-icon {
+    font-size: 18px;
+    color: $on-surface-variant;
+    margin-right: 10px;
+  }
+
+  scale {
+    min-height: 28px;
+
+    trough {
+      background-color: rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+      min-height: 12px;
+    }
+
+    highlight {
+      background-color: $primary;
+      border-radius: 9999px;
+      min-height: 12px;
+    }
+
+    slider {
+      background-color: $primary;
+      border-radius: 9999px;
+      min-width: 18px;
+      min-height: 18px;
+      margin: -3px 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .slider-value-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: $on-surface-variant;
+    min-width: 36px;
+    margin-left: 8px;
+  }
+}
+
+// Media Player in Quick Settings
+.qs-media-card {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid $outline;
+  border-radius: 20px;
+  padding: 12px 14px;
+  margin-top: 8px;
+
+  .media-art {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin-right: 12px;
+  }
+
+  .media-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+
+  .media-artist {
+    font-size: 11px;
+    font-weight: 400; // Regular
+    color: $on-surface-variant;
+  }
+
+  .media-ctrl-btn {
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 9999px;
+    margin-left: 4px;
+
+    &:hover {
+      background-color: $hover-tint;
+    }
+
+    .ctrl-icon {
+      font-size: 16px;
+      color: $on-surface;
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// 3. LAUNCHER POPUP
+// -------------------------------------------------------------
+.LauncherWindow {
+  background: transparent;
+}
+
+.launcher-card {
+  background: $surface-container;
+  border: 1px solid $outline;
+  border-radius: 28px;
+  padding: 24px;
+  min-width: 520px;
+  min-height: 480px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+// Search bar
+.launcher-search-box {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  transition: all 180ms ease;
+
+  &:focus-within {
+    border-color: $outline-focus;
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .search-icon {
+    font-size: 20px;
+    color: $primary;
+    margin-right: 12px;
+  }
+
+  entry {
+    font-size: 15px;
+    font-weight: 400;
+    color: $on-surface;
+    caret-color: $primary;
+  }
+}
+
+// Calculator card
+.calculator-result-card {
+  background-color: rgba(168, 199, 250, 0.15);
+  border-radius: 16px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+
+  .calc-query {
+    font-size: 12px;
+    font-weight: 400;
+    color: $on-surface-variant;
+  }
+
+  .calc-answer {
+    font-size: 22px;
+    font-weight: 500;
+    color: $primary;
+    margin-top: 2px;
+  }
+}
+
+// Apps Grid
+.launcher-apps-scroll {
+  min-height: 380px;
+}
+
+.app-grid-tile {
+  min-width: 88px;
+  min-height: 96px;
+  border-radius: 18px;
+  padding: 10px 4px;
+  margin: 4px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  &:active {
+    background-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .grid-app-icon {
+    font-size: 40px;
+    margin-bottom: 6px;
+  }
+
+  .grid-app-label {
+    font-size: 12px;
+    font-weight: 400; // Regular
+    color: $on-surface;
+  }
+}
+
+// -------------------------------------------------------------
+// 4. SCREEN CAPTURE FLOATING PILL
+// -------------------------------------------------------------
+.ScreenCaptureWindow {
+  background: transparent;
+}
+
+.screencapture-pill {
+  background: $surface-container-high;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.capture-mode-segment {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  padding: 3px;
+  margin-right: 12px;
+}
+
+.capture-mode-btn {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  &.active {
+    background-color: $primary;
+    
+    .mode-icon, .mode-label {
+      color: $on-primary;
+    }
+  }
+
+  &:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .mode-icon {
+    font-size: 16px;
+    margin-right: 6px;
+    color: $on-surface;
+  }
+
+  .mode-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+}
+
+.capture-trigger-btn {
+  background-color: $primary;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 9999px;
+  margin-right: 8px;
+  transition: all 180ms ease;
+
+  &:hover {
+    background-color: #c2e7ff;
+  }
+  &:active {
+    background-color: #7cacf8;
+  }
+
+  .trigger-icon {
+    font-size: 18px;
+    color: $on-primary;
+  }
+}
+
+.capture-close-btn {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 9999px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+  }
+
+  .close-icon {
+    font-size: 16px;
+    color: $on-surface-variant;
+  }
+}
