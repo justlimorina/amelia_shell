@@ -1,6 +1,12 @@
 import app from "ags/gtk3/app"
+import { toggleSettingsWindow } from "./settings_window"
 
 export function toggleExclusive(targetName: string) {
+  if (targetName === "settings") {
+    toggleSettingsWindow()
+    return
+  }
+
   const popupNames = ["quicksettings", "calendar", "launcher"]
 
   const targetWin = app.get_window(targetName)

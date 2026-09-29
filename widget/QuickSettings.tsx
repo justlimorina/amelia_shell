@@ -10,6 +10,7 @@ import Mpris from "gi://AstalMpris"
 import { themeMode, setThemeMode } from "../lib/settings"
 import { loc, t } from "../lib/i18n"
 import { toggleExclusive } from "../lib/window_manager"
+import { showSettingsWindow } from "../lib/settings_window"
 
 interface WifiNetwork {
   inUse: boolean
@@ -364,9 +365,7 @@ export default function QuickSettings() {
   const openAmeliaSettings = () => {
     app.toggle_window("quicksettings")
     setTimeout(() => {
-      const win = app.get_window("settings")
-      if (win) win.visible = true
-      else app.toggle_window("settings")
+      showSettingsWindow()
     }, 100)
   }
 

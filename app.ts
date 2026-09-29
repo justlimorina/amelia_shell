@@ -9,13 +9,17 @@ import Settings from "./widget/Settings"
 import { closeAllPopups } from "./lib/window_manager"
 import { accentColor, cornerRadius } from "./lib/settings"
 import { applyAccentColor, applyCornerRadius } from "./lib/theme"
+import { toggleSettingsWindow } from "./lib/settings_window"
 
 app.start({
-  instanceName: "ags",
+  instanceName: "amelia-shell",
   css: style,
   requestHandler(request, res) {
     const reqStr = Array.isArray(request) ? request.join(" ") : String(request)
-    if (reqStr.includes("close-popups") || reqStr.includes("close-all")) {
+    if (reqStr === "settings-toggle") {
+      toggleSettingsWindow()
+      res("ok")
+    } else if (reqStr.includes("close-popups") || reqStr.includes("close-all")) {
       closeAllPopups()
       res("ok")
     } else {

@@ -20,6 +20,7 @@ import {
 } from "../lib/settings"
 import { loc } from "../lib/i18n"
 import { applyAccentColor, applyCornerRadius } from "../lib/theme"
+import { registerSettingsWindow } from "../lib/settings_window"
 
 type SettingsTab = "general" | "appearance" | "shelf" | "shortcuts" | "about"
 
@@ -59,8 +60,9 @@ export default function Settings() {
       visible={false}
       application={app}
       $={(self) => {
+        registerSettingsWindow(self)
         self.connect("delete-event", () => {
-          self.visible = false
+          self.hide()
           return true
         })
       }}
