@@ -174,6 +174,8 @@ export default function Calendar() {
           <label label={loc("calendarTitle")} class="cal-date-sub" xalign={0} />
         </box>
 
+        <box class="calendar-pinned-content" vertical>
+
         {/* Month Navigation */}
         <centerbox class="calendar-nav-row" valign={Gtk.Align.CENTER}>
           <label
@@ -241,8 +243,9 @@ export default function Calendar() {
                 cells.push({ num: d, currentMonth: true })
               }
 
-              // Next month leading days to complete 35 or 42 cells
-              const totalCells = cells.length > 35 ? 42 : 35
+              // Keep the six-week grid at a fixed height so the event notes
+              // and notification panel never jump when navigating months.
+              const totalCells = 42
               const nextDays = totalCells - cells.length
               for (let n = 1; n <= nextDays; n++) {
                 cells.push({ num: n, currentMonth: false })
@@ -348,7 +351,10 @@ export default function Calendar() {
           }}
         </With>
 
+        </box>
+
         {/* Notifications Section */}
+        <box class="calendar-notification-panel" vertical vexpand>
         <box class="cal-notifications-header" valign={Gtk.Align.CENTER}>
           <label label={loc("notifications")} class="notif-section-title" hexpand xalign={0} />
           <With value={notificationsList}>
@@ -370,7 +376,7 @@ export default function Calendar() {
         </box>
 
         {/* Notification list */}
-        <scrollable class="qs-subview-scroll" vscroll={Gtk.PolicyType.AUTOMATIC} hscroll={Gtk.PolicyType.NEVER}>
+        <scrollable class="qs-subview-scroll" vscroll={Gtk.PolicyType.AUTOMATIC} hscroll={Gtk.PolicyType.NEVER} vexpand>
           <box vertical spacing={4}>
             <With value={notificationsList}>
               {(notifs) =>
@@ -420,6 +426,7 @@ export default function Calendar() {
             </With>
           </box>
         </scrollable>
+        </box>
       </box>
     </window>
   )

@@ -1,5 +1,5 @@
 import app from "ags/gtk3/app"
-import { Astal, Gtk } from "ags/gtk3"
+import { Gtk } from "ags/gtk3"
 import { createState, With } from "ags"
 import { execAsync } from "ags/process"
 import {
@@ -47,34 +47,25 @@ export default function Settings() {
   ]
 
   return (
-    <window
+    <Gtk.ApplicationWindow
       name="settings"
+      title={loc("configTitle")}
+      iconName="preferences-system-symbolic"
       class="SettingsWindow"
-      anchor={Astal.WindowAnchor.NONE}
-      exclusivity={Astal.Exclusivity.NONE}
-      layer={Astal.Layer.OVERLAY}
-      keymode={Astal.Keymode.ON_DEMAND}
+      decorated={true}
+      resizable={true}
+      defaultWidth={900}
+      defaultHeight={640}
       visible={false}
       application={app}
+      $={(self) => {
+        self.connect("delete-event", () => {
+          self.visible = false
+          return true
+        })
+      }}
     >
       <box class={themeMode((m) => `settings-card ${m === "light" ? "light-theme" : ""}`)} vertical>
-        {/* Top Header */}
-        <centerbox class="settings-header">
-          <box $type="start" valign={Gtk.Align.CENTER} spacing={8}>
-            <icon icon="emblem-system-symbolic" class="settings-title-icon" />
-            <label label={loc("configTitle")} class="settings-title" />
-          </box>
-          <box $type="center" />
-          <button
-            class="qs-icon-btn"
-            $type="end"
-            tooltipText={loc("close")}
-            onClicked={() => app.toggle_window("settings")}
-          >
-            <icon icon="window-close-symbolic" class="btn-icon" />
-          </button>
-        </centerbox>
-
         {/* Main Body: Left Navigation Sidebar & Right Content */}
         <box class="settings-body" spacing={16} hexpand vexpand>
           {/* Left Navigation Rail */}
@@ -131,7 +122,14 @@ export default function Settings() {
           </box>
 
           {/* Right Content Pane */}
-          <box class="settings-content-pane" vertical hexpand vexpand>
+          <scrollable
+            class="settings-content-pane"
+            vscroll={Gtk.PolicyType.AUTOMATIC}
+            hscroll={Gtk.PolicyType.NEVER}
+            hexpand
+            vexpand
+          >
+            <box vertical hexpand>
             <With value={activeTab}>
               {(tab) => {
                 if (tab === "general") {
@@ -375,9 +373,10 @@ export default function Settings() {
                 )
               }}
             </With>
-          </box>
+            </box>
+          </scrollable>
         </box>
       </box>
-    </window>
+    </Gtk.ApplicationWindow>
   )
 }

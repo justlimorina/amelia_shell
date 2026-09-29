@@ -1,7 +1,7 @@
 import app from "ags/gtk3/app"
 
 export function toggleExclusive(targetName: string) {
-  const popupNames = ["quicksettings", "calendar", "launcher", "settings"]
+  const popupNames = ["quicksettings", "calendar", "launcher"]
 
   const targetWin = app.get_window(targetName)
   const isCurrentlyVisible = targetWin ? targetWin.visible : false
@@ -23,7 +23,7 @@ export function toggleExclusive(targetName: string) {
 }
 
 export function closeAllPopups() {
-  const popupNames = ["quicksettings", "calendar", "launcher", "screencapture", "settings"]
+  const popupNames = ["quicksettings", "calendar", "launcher", "screencapture"]
   for (const name of popupNames) {
     const win = app.get_window(name)
     if (win) win.visible = false

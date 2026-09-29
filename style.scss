@@ -1248,27 +1248,30 @@ $active-tint: rgba(255, 255, 255, 0.12);
 
 .settings-card {
   background: rgba(30, 29, 36, 0.98);
-  border: 1px solid $outline;
-  border-radius: 28px;
-  padding: 24px;
+  padding: 20px 24px 24px;
   min-width: 680px;
   min-height: 480px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
 }
 
-.settings-header {
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.settings-card.light-theme {
+  background-color: #f7f2fa;
+  color: #1b1b1f;
 
-  .settings-title-icon {
-    font-size: 22px;
-    color: $primary;
+  .settings-nav-sidebar { border-right-color: rgba(29, 27, 32, 0.12); }
+  .settings-nav-btn {
+    .nav-label { color: #1b1b1f; }
+    .nav-icon { color: #49454f; }
   }
-  .settings-title {
-    font-size: 16px;
-    font-weight: 500;
+  .settings-section-card { background-color: rgba(29, 27, 32, 0.045); }
+  .setting-heading, .about-title { color: #1b1b1f; }
+  .setting-subtext, .shortcut-desc { color: #49454f; }
+  .shortcut-row { background-color: rgba(29, 27, 32, 0.045); }
+  .shortcut-key, .about-version, .about-logo { color: $primary; }
+  .option-pill-btn {
+    background-color: rgba(29, 27, 32, 0.07);
+    &:hover { background-color: rgba(29, 27, 32, 0.12); }
   }
+  .accent-color-chip.selected { border-color: #1b1b1f; }
 }
 
 .settings-nav-sidebar {

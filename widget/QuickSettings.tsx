@@ -766,99 +766,77 @@ export default function QuickSettings() {
 
                 {/* Power Confirmation Dialog / Options */}
                 <With value={showPowerConfirm}>
-                  {(show) =>
-                    show ? (
+                  {(show) => show ? (
                       <box class="qs-power-card" vertical>
                         <With value={pendingPowerAction}>
                           {(pendingAction) => pendingAction ? (
-                          <box vertical spacing={10}>
-                            <label
-                              label={pendingAction === "shutdown" ? t("confirmShutDown")
-                                : pendingAction === "restart" ? t("confirmRestart")
-                                : pendingAction === "suspend" ? t("confirmSuspend")
-                                : t("confirmLogOut")}
-                              class="power-heading"
-                              xalign={0}
-                            />
-                            <label label={loc("confirmPowerBody")} class="power-subtext" xalign={0} wrap />
-                            <box spacing={8} homogeneous>
-                              <button class="power-opt-btn" onClicked={() => setPendingPowerAction(null)}>
-                                <label label={loc("cancel")} class="power-btn-label" />
-                              </button>
-                              <button class="power-opt-btn danger" onClicked={executePowerAction}>
-                                <label label={loc("confirm")} class="power-btn-label" />
-                              </button>
+                            <box vertical spacing={10}>
+                              <label
+                                label={pendingAction === "shutdown" ? t("confirmShutDown")
+                                  : pendingAction === "restart" ? t("confirmRestart")
+                                  : pendingAction === "suspend" ? t("confirmSuspend")
+                                  : t("confirmLogOut")}
+                                class="power-heading"
+                                xalign={0}
+                              />
+                              <label label={loc("confirmPowerBody")} class="power-subtext" xalign={0} wrap />
+                              <box spacing={8} homogeneous>
+                                <button class="power-opt-btn" onClicked={() => setPendingPowerAction(null)}>
+                                  <label label={loc("cancel")} class="power-btn-label" />
+                                </button>
+                                <button class="power-opt-btn danger" onClicked={executePowerAction}>
+                                  <label label={loc("confirm")} class="power-btn-label" />
+                                </button>
+                              </box>
                             </box>
-                          </box>
-                        ) : (
-                          <box vertical spacing={10}>
-                        <centerbox>
-                          <label label={loc("powerOptions")} class="power-heading" $type="start" xalign={0} />
-                          <box $type="center" />
-                          <button
-                            class="qs-icon-btn"
-                            $type="end"
-                            onClicked={() => setShowPowerConfirm(false)}
-                            tooltipText={loc("close")}
-                          >
-                            <icon icon="window-close-symbolic" class="btn-icon" />
-                          </button>
-                        </centerbox>
-                        <label label={loc("choosePowerAction")} class="power-subtext" xalign={0} />
-                        <box spacing={8} homogeneous>
-                          <button
-                            class="power-opt-btn danger"
-                            onClicked={() => {
-                              setPendingPowerAction("shutdown")
-                            }}
-                          >
-                            <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-                              <icon icon="system-shutdown-symbolic" class="power-btn-icon" />
-                              <label label={loc("shutDown")} class="power-btn-label" />
+                          ) : (
+                            <box vertical spacing={10}>
+                              <centerbox>
+                                <label label={loc("powerOptions")} class="power-heading" $type="start" xalign={0} />
+                                <box $type="center" />
+                                <button
+                                  class="qs-icon-btn"
+                                  $type="end"
+                                  onClicked={() => setShowPowerConfirm(false)}
+                                  tooltipText={loc("close")}
+                                >
+                                  <icon icon="window-close-symbolic" class="btn-icon" />
+                                </button>
+                              </centerbox>
+                              <label label={loc("choosePowerAction")} class="power-subtext" xalign={0} />
+                              <box spacing={8} homogeneous>
+                                <button class="power-opt-btn danger" onClicked={() => setPendingPowerAction("shutdown")}>
+                                  <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
+                                    <icon icon="system-shutdown-symbolic" class="power-btn-icon" />
+                                    <label label={loc("shutDown")} class="power-btn-label" />
+                                  </box>
+                                </button>
+                                <button class="power-opt-btn danger" onClicked={() => setPendingPowerAction("restart")}>
+                                  <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
+                                    <icon icon="system-reboot-symbolic" class="power-btn-icon" />
+                                    <label label={loc("restart")} class="power-btn-label" />
+                                  </box>
+                                </button>
+                                <button class="power-opt-btn" onClicked={() => setPendingPowerAction("suspend")}>
+                                  <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
+                                    <icon icon="system-suspend-symbolic" class="power-btn-icon" />
+                                    <label label={loc("suspend")} class="power-btn-label" />
+                                  </box>
+                                </button>
+                                <button class="power-opt-btn" onClicked={() => setPendingPowerAction("logout")}>
+                                  <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
+                                    <icon icon="system-log-out-symbolic" class="power-btn-icon" />
+                                    <label label={loc("logOut")} class="power-btn-label" />
+                                  </box>
+                                </button>
+                              </box>
                             </box>
-                          </button>
-                          <button
-                            class="power-opt-btn danger"
-                            onClicked={() => {
-                              setPendingPowerAction("restart")
-                            }}
-                          >
-                            <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-                              <icon icon="system-reboot-symbolic" class="power-btn-icon" />
-                              <label label={loc("restart")} class="power-btn-label" />
-                            </box>
-                          </button>
-                          <button
-                            class="power-opt-btn"
-                            onClicked={() => {
-                              setPendingPowerAction("suspend")
-                            }}
-                          >
-                            <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-                              <icon icon="system-suspend-symbolic" class="power-btn-icon" />
-                              <label label={loc("suspend")} class="power-btn-label" />
-                            </box>
-                          </button>
-                          <button
-                            class="power-opt-btn"
-                            onClicked={() => {
-                              setPendingPowerAction("logout")
-                            }}
-                          >
-                            <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-                              <icon icon="system-log-out-symbolic" class="power-btn-icon" />
-                              <label label={loc("logOut")} class="power-btn-label" />
-                            </box>
-                          </button>
-                        </box>
-                          </box>
-                        )}
+                          )}
                         </With>
                       </box>
                     ) : (
                       <box />
-                    )
-                  }
+                    )}
                 </With>
 
                 <With value={systemToggleError}>
