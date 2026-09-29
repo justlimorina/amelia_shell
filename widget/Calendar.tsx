@@ -1,6 +1,6 @@
 import app from "ags/gtk3/app"
 import { Astal, Gtk } from "ags/gtk3"
-import { createState, createBinding, With } from "ags"
+import { createState, createBinding, createMemo, With } from "ags"
 import { createPoll } from "ags/time"
 import Notifd from "gi://AstalNotifd"
 import { language, themeMode } from "../lib/settings"
@@ -40,6 +40,15 @@ export default function Calendar() {
     year: initialToday.getFullYear(),
     month: initialToday.getMonth(),
     day: initialToday.getDate(),
+  })
+
+  // Memoized calendar grid state combining viewDate, selectedDate, and currentDay
+  const calendarGridState = createMemo(() => {
+    return {
+      vd: viewDate(),
+      sel: selectedDate(),
+      now: currentDay(),
+    }
   })
 
   const prevMonth = () => {
@@ -148,8 +157,8 @@ export default function Calendar() {
 
         {/* Calendar Day Grid Matrix */}
         <box class="cal-grid-wrapper" vertical>
-          <With value={viewDate}>
-            {(vd) => {
+          <With value={calendarGridState}>
+            {({ vd, sel, now }) => {
               const firstDay = new Date(vd.year, vd.month, 1)
               let startDayIndex = firstDay.getDay() - 1
               if (startDayIndex === -1) startDayIndex = 6
@@ -190,37 +199,26 @@ export default function Calendar() {
                   {rows.map((row) => (
                     <box spacing={2} homogeneous>
                       {row.map((c) => {
-                        const isTodayBinding = currentDay((now) => {
-                          return (
-                            c.currentMonth &&
-                            now.getFullYear() === vd.year &&
-                            now.getMonth() === vd.month &&
-                            now.getDate() === c.num
-                          )
-                        })
+                        const isToday =
+                          c.currentMonth &&
+                          now.getFullYear() === vd.year &&
+                          now.getMonth() === vd.month &&
+                          now.getDate() === c.num
 
-                        const isSelectedBinding = selectedDate((sel) => {
-                          return (
-                            c.currentMonth &&
-                            sel.year === vd.year &&
-                            sel.month === vd.month &&
-                            sel.day === c.num
-                          )
-                        })
+                        const isSelected =
+                          c.currentMonth &&
+                          sel.year === vd.year &&
+                          sel.month === vd.month &&
+                          sel.day === c.num
 
-                        const cellClass = isTodayBinding((isTod) =>
-                          isSelectedBinding((isSel) => {
-                            let cls = "cal-day-cell"
-                            if (isTod) cls += " today"
-                            if (isSel) cls += " selected"
-                            if (!c.currentMonth) cls += " other-month"
-                            return cls
-                          })
-                        )
+                        let cls = "cal-day-cell"
+                        if (isToday) cls += " today"
+                        if (isSelected) cls += " selected"
+                        if (!c.currentMonth) cls += " other-month"
 
                         return (
                           <button
-                            class={cellClass}
+                            class={cls}
                             halign={Gtk.Align.CENTER}
                             valign={Gtk.Align.CENTER}
                             onClicked={() => {

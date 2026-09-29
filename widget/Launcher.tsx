@@ -125,7 +125,7 @@ export default function Launcher() {
     return false
   }
 
-  return (
+  const win = (
     <window
       name="launcher"
       class="LauncherWindow"
@@ -138,19 +138,6 @@ export default function Launcher() {
       visible={false}
       application={app}
       onKeyPressEvent={handleWindowKeyPress}
-      setup={(win) => {
-        win.connect("notify::visible", () => {
-          if (win.visible) {
-            setQuery("")
-            setCalcResult(null)
-            setSelectedIndex(0)
-            if (searchEntryWidget) {
-              searchEntryWidget.text = ""
-              searchEntryWidget.grab_focus()
-            }
-          }
-        })
-      }}
     >
       <box class={themeMode((m) => `launcher-card ${m === "light" ? "light-theme" : ""}`)} vertical>
         {/* Top Search Bar */}
@@ -160,7 +147,7 @@ export default function Launcher() {
             hexpand
             placeholderText={loc("searchPlaceholder")}
             text={query}
-            setup={(self) => {
+            $={(self) => {
               searchEntryWidget = self
             }}
             onChanged={(entry) => handleSearchChange(entry.text)}
@@ -303,5 +290,19 @@ export default function Launcher() {
         </scrollable>
       </box>
     </window>
-  )
+  ) as Astal.Window
+
+  win.connect("notify::visible", () => {
+    if (win.visible) {
+      setQuery("")
+      setCalcResult(null)
+      setSelectedIndex(0)
+      if (searchEntryWidget) {
+        searchEntryWidget.text = ""
+        searchEntryWidget.grab_focus()
+      }
+    }
+  })
+
+  return win
 }
