@@ -82,10 +82,6 @@ export default function QuickSettings() {
   const toggleDarkMode = () => {
     const next = themeMode() === "dark" ? "light" : "dark"
     setThemeMode(next)
-    const scheme = next === "dark" ? "prefer-dark" : "prefer-light"
-    const gtkTheme = next === "dark" ? "Adwaita-dark" : "Adwaita"
-    execAsync(`gsettings set org.gnome.desktop.interface color-scheme '${scheme}'`).catch(() => {})
-    execAsync(`gsettings set org.gnome.desktop.interface gtk-theme '${gtkTheme}'`).catch(() => {})
   }
 
   // Airplane mode state

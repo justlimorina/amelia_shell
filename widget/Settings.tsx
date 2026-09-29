@@ -201,10 +201,7 @@ export default function Settings() {
                         <box spacing={10} css="margin-top: 8px;">
                           <button
                             class={themeMode((m) => `option-pill-btn ${m === "dark" ? "active" : ""}`)}
-                            onClicked={() => {
-                              setThemeMode("dark")
-                              execAsync("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'").catch(() => {})
-                            }}
+                            onClicked={() => setThemeMode("dark")}
                           >
                             <box spacing={6} valign={Gtk.Align.CENTER}>
                               <icon icon="weather-clear-night-symbolic" class="btn-icon" />
@@ -213,10 +210,7 @@ export default function Settings() {
                           </button>
                           <button
                             class={themeMode((m) => `option-pill-btn ${m === "light" ? "active" : ""}`)}
-                            onClicked={() => {
-                              setThemeMode("light")
-                              execAsync("gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'").catch(() => {})
-                            }}
+                            onClicked={() => setThemeMode("light")}
                           >
                             <box spacing={6} valign={Gtk.Align.CENTER}>
                               <icon icon="weather-clear-symbolic" class="btn-icon" />

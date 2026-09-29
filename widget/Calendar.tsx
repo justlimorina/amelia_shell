@@ -120,84 +120,88 @@ export default function Calendar() {
         </centerbox>
 
         {/* Weekday Names Header */}
-        <With value={language}>
-          {(lang) => {
-            const days = lang === "vi" ? weekDaysVi : weekDaysEn
-            return (
-              <box spacing={2} homogeneous>
-                {days.map((day) => (
-                  <label label={day} class="cal-weekday-label" halign={Gtk.Align.CENTER} />
-                ))}
-              </box>
-            )
-          }}
-        </With>
+        <box class="cal-weekdays-wrapper" vertical>
+          <With value={language}>
+            {(lang) => {
+              const days = lang === "vi" ? weekDaysVi : weekDaysEn
+              return (
+                <box spacing={2} homogeneous>
+                  {days.map((day) => (
+                    <label label={day} class="cal-weekday-label" halign={Gtk.Align.CENTER} />
+                  ))}
+                </box>
+              )
+            }}
+          </With>
+        </box>
 
         {/* Calendar Day Grid Matrix */}
-        <With value={viewDate}>
-          {(vd) => {
-            const firstDay = new Date(vd.year, vd.month, 1)
-            let startDayIndex = firstDay.getDay() - 1
-            if (startDayIndex === -1) startDayIndex = 6
+        <box class="cal-grid-wrapper" vertical>
+          <With value={viewDate}>
+            {(vd) => {
+              const firstDay = new Date(vd.year, vd.month, 1)
+              let startDayIndex = firstDay.getDay() - 1
+              if (startDayIndex === -1) startDayIndex = 6
 
-            const daysInMonth = new Date(vd.year, vd.month + 1, 0).getDate()
-            const daysInPrevMonth = new Date(vd.year, vd.month, 0).getDate()
+              const daysInMonth = new Date(vd.year, vd.month + 1, 0).getDate()
+              const daysInPrevMonth = new Date(vd.year, vd.month, 0).getDate()
 
-            const cells: { num: number; currentMonth: boolean; isToday: boolean }[] = []
+              const cells: { num: number; currentMonth: boolean; isToday: boolean }[] = []
 
-            // Previous month trailing days
-            for (let i = startDayIndex - 1; i >= 0; i--) {
-              cells.push({
-                num: daysInPrevMonth - i,
-                currentMonth: false,
-                isToday: false,
-              })
-            }
+              // Previous month trailing days
+              for (let i = startDayIndex - 1; i >= 0; i--) {
+                cells.push({
+                  num: daysInPrevMonth - i,
+                  currentMonth: false,
+                  isToday: false,
+                })
+              }
 
-            // Current month days
-            const realToday = new Date()
-            for (let d = 1; d <= daysInMonth; d++) {
-              const isToday =
-                realToday.getFullYear() === vd.year &&
-                realToday.getMonth() === vd.month &&
-                realToday.getDate() === d
-              cells.push({ num: d, currentMonth: true, isToday })
-            }
+              // Current month days
+              const realToday = new Date()
+              for (let d = 1; d <= daysInMonth; d++) {
+                const isToday =
+                  realToday.getFullYear() === vd.year &&
+                  realToday.getMonth() === vd.month &&
+                  realToday.getDate() === d
+                cells.push({ num: d, currentMonth: true, isToday })
+              }
 
-            // Next month leading days to complete 35 or 42 cells
-            const totalCells = cells.length > 35 ? 42 : 35
-            const nextDays = totalCells - cells.length
-            for (let n = 1; n <= nextDays; n++) {
-              cells.push({ num: n, currentMonth: false, isToday: false })
-            }
+              // Next month leading days to complete 35 or 42 cells
+              const totalCells = cells.length > 35 ? 42 : 35
+              const nextDays = totalCells - cells.length
+              for (let n = 1; n <= nextDays; n++) {
+                cells.push({ num: n, currentMonth: false, isToday: false })
+              }
 
-            // Group into 7 columns per row
-            const rows: typeof cells[] = []
-            for (let i = 0; i < cells.length; i += 7) {
-              rows.push(cells.slice(i, i + 7))
-            }
+              // Group into 7 columns per row
+              const rows: typeof cells[] = []
+              for (let i = 0; i < cells.length; i += 7) {
+                rows.push(cells.slice(i, i + 7))
+              }
 
-            return (
-              <box vertical spacing={2}>
-                {rows.map((row) => (
-                  <box spacing={2} homogeneous>
-                    {row.map((c) => (
-                      <button
-                        class={`cal-day-cell ${c.isToday ? "today" : ""} ${
-                          !c.currentMonth ? "other-month" : ""
-                        }`}
-                        halign={Gtk.Align.CENTER}
-                        valign={Gtk.Align.CENTER}
-                      >
-                        <label label={String(c.num)} class="day-num" />
-                      </button>
-                    ))}
-                  </box>
-                ))}
-              </box>
-            )
-          }}
-        </With>
+              return (
+                <box vertical spacing={2}>
+                  {rows.map((row) => (
+                    <box spacing={2} homogeneous>
+                      {row.map((c) => (
+                        <button
+                          class={`cal-day-cell ${c.isToday ? "today" : ""} ${
+                            !c.currentMonth ? "other-month" : ""
+                          }`}
+                          halign={Gtk.Align.CENTER}
+                          valign={Gtk.Align.CENTER}
+                        >
+                          <label label={String(c.num)} class="day-num" />
+                        </button>
+                      ))}
+                    </box>
+                  ))}
+                </box>
+              )
+            }}
+          </With>
+        </box>
 
         {/* Notifications Section */}
         <box class="cal-notifications-header" valign={Gtk.Align.CENTER}>
