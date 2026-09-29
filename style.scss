@@ -164,9 +164,9 @@ $active-tint: rgba(255, 255, 255, 0.12);
 .qs-icon-btn {
   min-width: 36px;
   min-height: 36px;
+  padding: 0;
   border-radius: 9999px;
   background-color: rgba(255, 255, 255, 0.06);
-  margin-left: 6px;
   transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
 
   &:hover {
@@ -538,13 +538,61 @@ $active-tint: rgba(255, 255, 255, 0.12);
 
 .qs-subview-header {
   margin-bottom: 12px;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   .qs-subview-title {
     font-size: 15px;
     font-weight: 500;
-    margin-left: 8px;
+    color: $on-surface;
+    margin-left: 2px;
+  }
+}
+
+.qs-subview-toggle {
+  min-height: 32px;
+  min-width: 58px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: $on-surface-variant;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+  }
+  &:active {
+    background-color: rgba(255, 255, 255, 0.20);
+  }
+
+  &.active {
+    background-color: $primary;
+    border-color: transparent;
+
+    label {
+      color: $on-primary;
+      font-weight: 600;
+    }
+  }
+}
+
+.qs-device-action-badge {
+  font-size: 12px;
+  font-weight: 500;
+  color: $primary;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: rgba(168, 199, 250, 0.12);
+  transition: all 150ms ease;
+
+  &:hover {
+    background-color: rgba(168, 199, 250, 0.22);
   }
 }
 
@@ -644,6 +692,7 @@ $active-tint: rgba(255, 255, 255, 0.12);
 .cal-day-cell {
   min-width: 36px;
   min-height: 36px;
+  padding: 0;
   border-radius: 9999px;
   margin: 1px;
   transition: all 150ms ease;
@@ -749,6 +798,43 @@ $active-tint: rgba(255, 255, 255, 0.12);
   .qs-slider-row {
     background-color: rgba(0, 0, 0, 0.06);
     .slider-leading-icon, .slider-value-label { color: #49454f; }
+  }
+
+  .qs-subview-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+    .qs-subview-title {
+      color: #1d1b20;
+    }
+  }
+
+  .qs-subview-toggle {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.08);
+
+    label {
+      color: #49454f;
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.10);
+    }
+
+    &.active {
+      background-color: #0b57d0;
+
+      label {
+        color: #ffffff;
+      }
+    }
+  }
+
+  .qs-device-action-badge {
+    color: #0b57d0;
+    background-color: rgba(11, 87, 208, 0.10);
+
+    &:hover {
+      background-color: rgba(11, 87, 208, 0.18);
+    }
   }
 
   .qs-list-item {

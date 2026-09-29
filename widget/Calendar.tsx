@@ -107,13 +107,13 @@ export default function Calendar() {
           />
           <box $type="center" />
           <box $type="end" spacing={4} valign={Gtk.Align.CENTER}>
-            <button class="qs-icon-btn" tooltipText={loc("prevMonth")} onClicked={prevMonth}>
+            <button class="qs-icon-btn" valign={Gtk.Align.CENTER} tooltipText={loc("prevMonth")} onClicked={prevMonth}>
               <icon icon="go-previous-symbolic" class="btn-icon" />
             </button>
-            <button class="qs-icon-btn" tooltipText={loc("today")} onClicked={resetToday}>
+            <button class="qs-icon-btn" valign={Gtk.Align.CENTER} tooltipText={loc("today")} onClicked={resetToday}>
               <icon icon="appointment-soon-symbolic" class="btn-icon" />
             </button>
-            <button class="qs-icon-btn" tooltipText={loc("nextMonth")} onClicked={nextMonth}>
+            <button class="qs-icon-btn" valign={Gtk.Align.CENTER} tooltipText={loc("nextMonth")} onClicked={nextMonth}>
               <icon icon="go-next-symbolic" class="btn-icon" />
             </button>
           </box>
@@ -236,7 +236,7 @@ export default function Calendar() {
                         <centerbox>
                           <label label={n.summary} class="notif-title" $type="start" xalign={0} ellipsize={3} />
                           <box $type="center" />
-                          <button class="qs-icon-btn" onClicked={() => n.dismiss()} $type="end">
+                          <button class="qs-icon-btn" valign={Gtk.Align.CENTER} onClicked={() => n.dismiss()} $type="end">
                             <icon icon="window-close-symbolic" class="btn-icon" />
                           </button>
                         </centerbox>

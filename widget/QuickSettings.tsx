@@ -253,23 +253,30 @@ export default function QuickSettings() {
                 <box vertical>
                   {/* Wi-Fi Subview Header */}
                   <centerbox class="qs-subview-header" valign={Gtk.Align.CENTER}>
-                    <box $type="start" valign={Gtk.Align.CENTER}>
-                      <button class="qs-icon-btn" onClicked={() => setCurrentView("main")} tooltipText={loc("back")}>
-                        <icon icon="go-previous-symbolic" class="btn-icon" />
-                      </button>
-                      <label label={loc("wifiNetworks")} class="qs-subview-title" />
-                    </box>
-                    <box $type="center" />
-                    <box $type="end" valign={Gtk.Align.CENTER} spacing={6}>
+                    <box $type="start" valign={Gtk.Align.CENTER} spacing={8}>
                       <button
                         class="qs-icon-btn"
+                        valign={Gtk.Align.CENTER}
+                        onClicked={() => setCurrentView("main")}
+                        tooltipText={loc("back")}
+                      >
+                        <icon icon="go-previous-symbolic" class="btn-icon" />
+                      </button>
+                      <label label={loc("wifiNetworks")} class="qs-subview-title" valign={Gtk.Align.CENTER} />
+                    </box>
+                    <box $type="center" />
+                    <box $type="end" valign={Gtk.Align.CENTER} spacing={8}>
+                      <button
+                        class="qs-icon-btn"
+                        valign={Gtk.Align.CENTER}
                         tooltipText={loc("scan")}
                         onClicked={scanWifi}
                       >
                         <icon icon="view-refresh-symbolic" class="btn-icon" />
                       </button>
                       <button
-                        class={wifiActive((act) => `qs-pod ${act ? "active" : ""}`)}
+                        class={wifiActive((act) => `qs-subview-toggle ${act ? "active" : ""}`)}
+                        valign={Gtk.Align.CENTER}
                         onClicked={toggleWifi}
                       >
                         <label label={wifiActive((act) => (act ? t("on") : t("off")))} />
@@ -345,23 +352,30 @@ export default function QuickSettings() {
                 <box vertical>
                   {/* Bluetooth Subview Header */}
                   <centerbox class="qs-subview-header" valign={Gtk.Align.CENTER}>
-                    <box $type="start" valign={Gtk.Align.CENTER}>
-                      <button class="qs-icon-btn" onClicked={() => setCurrentView("main")} tooltipText={loc("back")}>
-                        <icon icon="go-previous-symbolic" class="btn-icon" />
-                      </button>
-                      <label label={loc("btDevices")} class="qs-subview-title" />
-                    </box>
-                    <box $type="center" />
-                    <box $type="end" valign={Gtk.Align.CENTER} spacing={6}>
+                    <box $type="start" valign={Gtk.Align.CENTER} spacing={8}>
                       <button
                         class="qs-icon-btn"
+                        valign={Gtk.Align.CENTER}
+                        onClicked={() => setCurrentView("main")}
+                        tooltipText={loc("back")}
+                      >
+                        <icon icon="go-previous-symbolic" class="btn-icon" />
+                      </button>
+                      <label label={loc("btDevices")} class="qs-subview-title" valign={Gtk.Align.CENTER} />
+                    </box>
+                    <box $type="center" />
+                    <box $type="end" valign={Gtk.Align.CENTER} spacing={8}>
+                      <button
+                        class="qs-icon-btn"
+                        valign={Gtk.Align.CENTER}
                         tooltipText={loc("scan")}
                         onClicked={scanBt}
                       >
                         <icon icon="view-refresh-symbolic" class="btn-icon" />
                       </button>
                       <button
-                        class={btPowered((p) => `qs-pod ${p ? "active" : ""}`)}
+                        class={btPowered((p) => `qs-subview-toggle ${p ? "active" : ""}`)}
+                        valign={Gtk.Align.CENTER}
                         onClicked={toggleBluetooth}
                       >
                         <label label={btPowered((p) => (p ? t("on") : t("off")))} />
@@ -397,7 +411,7 @@ export default function QuickSettings() {
                                     <box $type="end" valign={Gtk.Align.CENTER}>
                                       <label
                                         label={dev.connected ? t("disconnect") : t("connect")}
-                                        class="notif-clear-btn"
+                                        class="qs-device-action-badge"
                                       />
                                     </box>
                                   </centerbox>
@@ -432,9 +446,10 @@ export default function QuickSettings() {
 
                   <box $type="center" />
 
-                  <box $type="end" halign={Gtk.Align.END} valign={Gtk.Align.CENTER}>
+                  <box $type="end" halign={Gtk.Align.END} valign={Gtk.Align.CENTER} spacing={6}>
                     <button
                       class="qs-icon-btn"
+                      valign={Gtk.Align.CENTER}
                       tooltipText={loc("lock")}
                       onClicked={() => execAsync("loginctl lock-session").catch(console.error)}
                     >
@@ -442,6 +457,7 @@ export default function QuickSettings() {
                     </button>
                     <button
                       class="qs-icon-btn"
+                      valign={Gtk.Align.CENTER}
                       tooltipText={loc("settings")}
                       onClicked={openAmeliaSettings}
                     >
@@ -449,6 +465,7 @@ export default function QuickSettings() {
                     </button>
                     <button
                       class="qs-icon-btn"
+                      valign={Gtk.Align.CENTER}
                       tooltipText={loc("powerOff")}
                       onClicked={() => execAsync("systemctl poweroff").catch(console.error)}
                     >
@@ -456,6 +473,7 @@ export default function QuickSettings() {
                     </button>
                     <button
                       class="qs-icon-btn"
+                      valign={Gtk.Align.CENTER}
                       tooltipText={loc("collapse")}
                       onClicked={() => app.toggle_window("quicksettings")}
                     >
@@ -480,7 +498,7 @@ export default function QuickSettings() {
                         <icon icon="network-wireless-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
                           <label label={loc("wifi")} class="pod-title" xalign={0} />
-                          <label label={wifiSsid} class="pod-subtitle" xalign={0} maxWidthChars={8} ellipsize={3} />
+                          <label label={wifiSsid} class="pod-subtitle" xalign={0} maxWidthChars={14} ellipsize={3} />
                         </box>
                         <icon icon="go-next-symbolic" class="pod-chevron" />
                       </box>
@@ -512,7 +530,7 @@ export default function QuickSettings() {
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="airplane-mode-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label={loc("airplaneMode")} class="pod-title" xalign={0} maxWidthChars={10} ellipsize={3} />
+                          <label label={loc("airplaneMode")} class="pod-title" xalign={0} ellipsize={3} />
                           <label label={airplaneMode((act) => (act ? t("on") : t("off")))} class="pod-subtitle" xalign={0} />
                         </box>
                       </box>
