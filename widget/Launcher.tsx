@@ -2,6 +2,8 @@ import app from "ags/gtk3/app"
 import { Astal, Gtk, Gdk } from "ags/gtk3"
 import { createState, createBinding, With } from "ags"
 import Apps from "gi://AstalApps"
+import { themeMode } from "../lib/settings"
+import { loc } from "../lib/i18n"
 
 export default function Launcher() {
   const { BOTTOM, LEFT } = Astal.WindowAnchor
@@ -66,20 +68,20 @@ export default function Launcher() {
       visible={false}
       application={app}
     >
-      <box class="launcher-card" vertical>
+      <box class={themeMode((m) => `launcher-card ${m === "light" ? "light-theme" : ""}`)} vertical>
         {/* Top Search Bar */}
         <box class="launcher-search-box" valign={Gtk.Align.CENTER}>
           <icon icon="system-search-symbolic" class="search-icon" />
           <entry
             hexpand
-            placeholderText="Search your apps, calculate..."
+            placeholderText={loc("searchPlaceholder")}
             text={query}
             onChanged={(entry) => handleSearchChange(entry.text)}
             onActivate={handleEntryActivate}
           />
           <button
             class="qs-icon-btn"
-            tooltipText="Clear search"
+            tooltipText={loc("clearSearch")}
             visible={query((q) => Boolean(q.trim()))}
             onClicked={() => handleSearchChange("")}
           >

@@ -6,6 +6,9 @@ import { createBinding } from "ags"
 import Network from "gi://AstalNetwork"
 import Battery from "gi://AstalBattery"
 import Wp from "gi://AstalWp"
+import { toggleExclusive } from "../lib/window_manager"
+import { loc } from "../lib/i18n"
+import { clock24h, themeMode, language } from "../lib/settings"
 
 export default function Shelf(gdkmonitor: Gdk.Monitor) {
   const { BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor
@@ -15,9 +18,25 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
   const battery = Battery.get_default()
   const wp = Wp.get_default()
 
-  // Real-time time & date polls
-  const timeStr = createPoll("", 1000, "date +'%H:%M'")
-  const dateStr = createPoll("", 60000, "date +'%a, %d/%m'")
+  // Real-time time & date polls reacting to settings
+  const timeStr = createPoll("", 1000, () => {
+    const d = new Date()
+    const is24 = clock24h()
+    const hours = is24 ? String(d.getHours()).padStart(2, "0") : String(d.getHours() % 12 || 12)
+    const minutes = String(d.getMinutes()).padStart(2, "0")
+    const ampm = is24 ? "" : (d.getHours() >= 12 ? " PM" : " AM")
+    return `${hours}:${minutes}${ampm}`
+  })
+
+  const dateStr = createPoll("", 10000, () => {
+    const lang = language()
+    const locale = lang === "vi" ? "vi-VN" : "en-US"
+    return new Date().toLocaleDateString(locale, {
+      weekday: "short",
+      day: "numeric",
+      month: "numeric",
+    })
+  })
 
   // Network reactive icon
   const wifiIcon = createBinding(network, "primary")((primary) => {
@@ -49,13 +68,21 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
     { name: "Terminal", icon: "org.gnome.Ptyxis", cmd: "ptyxis" },
     { name: "Browser", icon: "google-chrome", cmd: "google-chrome || chromium || firefox" },
     { name: "Files", icon: "org.gnome.Nautilus", cmd: "nautilus" },
-    { name: "Settings", icon: "org.gnome.Settings", cmd: "gnome-control-center" },
+    { name: "Amelia Settings", icon: "emblem-system-symbolic", cmd: "settings" },
   ]
+
+  const handleAppClick = (cmd: string) => {
+    if (cmd === "settings") {
+      toggleExclusive("settings")
+    } else {
+      execAsync(cmd).catch(console.error)
+    }
+  }
 
   return (
     <window
       name={`shelf-${gdkmonitor.get_model() || "default"}`}
-      class="Shelf"
+      class={themeMode((m) => `Shelf ${m === "light" ? "light-theme" : ""}`)}
       gdkmonitor={gdkmonitor}
       exclusivity={Astal.Exclusivity.EXCLUSIVE}
       anchor={BOTTOM | LEFT | RIGHT}
@@ -66,8 +93,8 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
         <box $type="start" halign={Gtk.Align.START} valign={Gtk.Align.CENTER}>
           <button
             class="shelf-launcher-btn"
-            tooltipText="Launcher"
-            onClicked={() => app.toggle_window("launcher")}
+            tooltipText={loc("launcherTooltip")}
+            onClicked={() => toggleExclusive("launcher")}
             valign={Gtk.Align.CENTER}
           >
             <icon icon="view-app-grid-symbolic" class="launcher-icon" />
@@ -80,7 +107,7 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
             <button
               class="shelf-app-item"
               tooltipText={appDef.name}
-              onClicked={() => execAsync(appDef.cmd).catch(console.error)}
+              onClicked={() => handleAppClick(appDef.cmd)}
               valign={Gtk.Align.CENTER}
             >
               <icon icon={appDef.icon} class="app-icon" />
@@ -93,8 +120,8 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
           {/* Status Tray Pill (Wi-Fi, Volume, Battery) */}
           <button
             class="shelf-pill"
-            tooltipText="Quick Settings"
-            onClicked={() => app.toggle_window("quicksettings")}
+            tooltipText={loc("quickSettingsTooltip")}
+            onClicked={() => toggleExclusive("quicksettings")}
             valign={Gtk.Align.CENTER}
           >
             <box valign={Gtk.Align.CENTER}>
@@ -108,8 +135,8 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
           {/* Date & Time Pill */}
           <button
             class="shelf-pill"
-            tooltipText="Calendar & Notifications"
-            onClicked={() => app.toggle_window("calendar")}
+            tooltipText={loc("calendarTooltip")}
+            onClicked={() => toggleExclusive("calendar")}
             valign={Gtk.Align.CENTER}
           >
             <box valign={Gtk.Align.CENTER}>

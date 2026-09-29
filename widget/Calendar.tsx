@@ -3,13 +3,26 @@ import { Astal, Gtk } from "ags/gtk3"
 import { createState, createBinding, With } from "ags"
 import { createPoll } from "ags/time"
 import Notifd from "gi://AstalNotifd"
+import { language, themeMode } from "../lib/settings"
+import { loc } from "../lib/i18n"
+import { toggleExclusive } from "../lib/window_manager"
 
 export default function Calendar() {
   const { BOTTOM, RIGHT } = Astal.WindowAnchor
   const notifd = Notifd.get_default()
 
-  // Real-time date formatted
-  const fullDateStr = createPoll("", 1000, "date +'%A, %d %B %Y'")
+  // Real-time date formatted (localized)
+  const fullDateStr = createPoll("", 1000, () => {
+    const lang = language()
+    const locale = lang === "vi" ? "vi-VN" : "en-US"
+    return new Date().toLocaleDateString(locale, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+  })
+
   const timeNowStr = createPoll("", 1000, "date +'%H:%M'")
 
   // Calendar month/year navigation state
@@ -42,11 +55,17 @@ export default function Calendar() {
     setViewDate({ year: now.getFullYear(), month: now.getMonth() })
   }
 
-  const monthNames = [
+  const monthNamesEn = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ]
+  const monthNamesVi = [
     "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
     "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
   ]
-  const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
+
+  const weekDaysEn = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+  const weekDaysVi = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
   // Notifications
   const notificationsList = createBinding(notifd, "notifications")
@@ -64,7 +83,7 @@ export default function Calendar() {
       visible={false}
       application={app}
     >
-      <box class="calendar-card" vertical>
+      <box class={themeMode((m) => `calendar-card ${m === "light" ? "light-theme" : ""}`)} vertical>
         {/* Header Pill: Full Date & Clock */}
         <box class="calendar-header-pill" vertical>
           <centerbox>
@@ -72,43 +91,52 @@ export default function Calendar() {
             <box $type="center" />
             <label label={timeNowStr} class="cal-date-big" $type="end" xalign={1} />
           </centerbox>
-          <label label="Lịch & Trung tâm thông báo" class="cal-date-sub" xalign={0} />
+          <label label={loc("calendarTitle")} class="cal-date-sub" xalign={0} />
         </box>
 
         {/* Month Navigation */}
         <centerbox class="calendar-nav-row" valign={Gtk.Align.CENTER}>
           <label
-            label={viewDate((d) => `${monthNames[d.month]} ${d.year}`)}
+            label={viewDate((d) => {
+              const names = language() === "vi" ? monthNamesVi : monthNamesEn
+              return `${names[d.month]} ${d.year}`
+            })}
             class="cal-month-label"
             $type="start"
             xalign={0}
           />
           <box $type="center" />
           <box $type="end" spacing={4} valign={Gtk.Align.CENTER}>
-            <button class="qs-icon-btn" tooltipText="Tháng trước" onClicked={prevMonth}>
+            <button class="qs-icon-btn" tooltipText={loc("prevMonth")} onClicked={prevMonth}>
               <icon icon="go-previous-symbolic" class="btn-icon" />
             </button>
-            <button class="qs-icon-btn" tooltipText="Hôm nay" onClicked={resetToday}>
+            <button class="qs-icon-btn" tooltipText={loc("today")} onClicked={resetToday}>
               <icon icon="appointment-soon-symbolic" class="btn-icon" />
             </button>
-            <button class="qs-icon-btn" tooltipText="Tháng sau" onClicked={nextMonth}>
+            <button class="qs-icon-btn" tooltipText={loc("nextMonth")} onClicked={nextMonth}>
               <icon icon="go-next-symbolic" class="btn-icon" />
             </button>
           </box>
         </centerbox>
 
         {/* Weekday Names Header */}
-        <box spacing={2} homogeneous>
-          {weekDays.map((day) => (
-            <label label={day} class="cal-weekday-label" halign={Gtk.Align.CENTER} />
-          ))}
-        </box>
+        <With value={language}>
+          {(lang) => {
+            const days = lang === "vi" ? weekDaysVi : weekDaysEn
+            return (
+              <box spacing={2} homogeneous>
+                {days.map((day) => (
+                  <label label={day} class="cal-weekday-label" halign={Gtk.Align.CENTER} />
+                ))}
+              </box>
+            )
+          }}
+        </With>
 
         {/* Calendar Day Grid Matrix */}
         <With value={viewDate}>
           {(vd) => {
             const firstDay = new Date(vd.year, vd.month, 1)
-            // In Vietnam/Europe, week starts on Monday (1). Sunday is 0.
             let startDayIndex = firstDay.getDay() - 1
             if (startDayIndex === -1) startDayIndex = 6
 
@@ -173,7 +201,7 @@ export default function Calendar() {
 
         {/* Notifications Section */}
         <box class="cal-notifications-header" valign={Gtk.Align.CENTER}>
-          <label label="Thông báo" class="notif-section-title" hexpand xalign={0} />
+          <label label={loc("notifications")} class="notif-section-title" hexpand xalign={0} />
           <With value={notificationsList}>
             {(notifs) =>
               notifs.length > 0 ? (
@@ -183,7 +211,7 @@ export default function Calendar() {
                     for (const n of notifs) n.dismiss()
                   }}
                 >
-                  <label label="Xóa tất cả" />
+                  <label label={loc("clearAll")} />
                 </button>
               ) : (
                 <box />
@@ -214,7 +242,7 @@ export default function Calendar() {
                   </box>
                 ) : (
                   <label
-                    label="Không có thông báo mới"
+                    label={loc("noNotifications")}
                     class="cal-date-sub"
                     xalign={0.5}
                     margin={12}

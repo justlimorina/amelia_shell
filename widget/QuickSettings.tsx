@@ -7,6 +7,9 @@ import Bluetooth from "gi://AstalBluetooth"
 import Wp from "gi://AstalWp"
 import Notifd from "gi://AstalNotifd"
 import Mpris from "gi://AstalMpris"
+import { themeMode, setThemeMode } from "../lib/settings"
+import { loc, t } from "../lib/i18n"
+import { toggleExclusive } from "../lib/window_manager"
 
 interface WifiNetwork {
   inUse: boolean
@@ -75,13 +78,12 @@ export default function QuickSettings() {
     }
   }
 
-  // Dark mode state
-  const [darkMode, setDarkMode] = createState(true)
+  // Dark mode toggle
   const toggleDarkMode = () => {
-    const next = !darkMode()
-    setDarkMode(next)
-    const scheme = next ? "prefer-dark" : "prefer-light"
-    const gtkTheme = next ? "Adwaita-dark" : "Adwaita"
+    const next = themeMode() === "dark" ? "light" : "dark"
+    setThemeMode(next)
+    const scheme = next === "dark" ? "prefer-dark" : "prefer-light"
+    const gtkTheme = next === "dark" ? "Adwaita-dark" : "Adwaita"
     execAsync(`gsettings set org.gnome.desktop.interface color-scheme '${scheme}'`).catch(() => {})
     execAsync(`gsettings set org.gnome.desktop.interface gtk-theme '${gtkTheme}'`).catch(() => {})
   }
@@ -102,7 +104,7 @@ export default function QuickSettings() {
 
   // Wi-Fi toggle & detailed networks list
   const wifiActive = createBinding(network, "primary")((p) => p === Network.Primary.WIFI)
-  const wifiSsid = createBinding(network, "wifi")((w) => w?.ssid || "Disconnected")
+  const wifiSsid = createBinding(network, "wifi")((w) => w?.ssid || t("disconnected"))
 
   const toggleWifi = async () => {
     if (network.wifi && network.wifi.enabled) {
@@ -134,7 +136,6 @@ export default function QuickSettings() {
           const security = parts[3] ? parts[3].trim() : ""
           const secured = security.length > 0 && security !== "--"
 
-          // Keep highest signal if duplicated
           if (!map.has(ssid) || (map.get(ssid)!.signal < signal && !map.get(ssid)!.inUse)) {
             map.set(ssid, { inUse, ssid, signal, secured })
           }
@@ -155,7 +156,7 @@ export default function QuickSettings() {
 
   // Bluetooth toggle & detailed devices list
   const btPowered = createBinding(bluetooth, "is_powered")
-  const btStatusText = btPowered((p) => (p ? "Enabled" : "Off"))
+  const btStatusText = btPowered((p) => (p ? t("on") : t("off")))
 
   const toggleBluetooth = async () => {
     const next = !bluetooth.is_powered
@@ -222,6 +223,16 @@ export default function QuickSettings() {
     }, 120)
   }
 
+  // Open Amelia Shell Configuration
+  const openAmeliaSettings = () => {
+    app.toggle_window("quicksettings")
+    setTimeout(() => {
+      const win = app.get_window("settings")
+      if (win) win.visible = true
+      else app.toggle_window("settings")
+    }, 100)
+  }
+
   // Active MPRIS player
   const activePlayer = createBinding(mpris, "players")((players) => (players.length > 0 ? players[0] : null))
 
@@ -238,7 +249,7 @@ export default function QuickSettings() {
       visible={false}
       application={app}
     >
-      <box class={darkMode((d) => `quicksettings-card ${d ? "dark-theme" : "light-theme"}`)} vertical>
+      <box class={themeMode((m) => `quicksettings-card ${m === "light" ? "light-theme" : ""}`)} vertical>
         <With value={currentView}>
           {(view) => {
             if (view === "wifi") {
@@ -247,16 +258,16 @@ export default function QuickSettings() {
                   {/* Wi-Fi Subview Header */}
                   <centerbox class="qs-subview-header" valign={Gtk.Align.CENTER}>
                     <box $type="start" valign={Gtk.Align.CENTER}>
-                      <button class="qs-icon-btn" onClicked={() => setCurrentView("main")} tooltipText="Quay lại">
+                      <button class="qs-icon-btn" onClicked={() => setCurrentView("main")} tooltipText={loc("back")}>
                         <icon icon="go-previous-symbolic" class="btn-icon" />
                       </button>
-                      <label label="Mạng Wi-Fi" class="qs-subview-title" />
+                      <label label={loc("wifiNetworks")} class="qs-subview-title" />
                     </box>
                     <box $type="center" />
                     <box $type="end" valign={Gtk.Align.CENTER} spacing={6}>
                       <button
                         class="qs-icon-btn"
-                        tooltipText="Quét mạng"
+                        tooltipText={loc("scan")}
                         onClicked={scanWifi}
                       >
                         <icon icon="view-refresh-symbolic" class="btn-icon" />
@@ -265,7 +276,7 @@ export default function QuickSettings() {
                         class={wifiActive((act) => `qs-pod ${act ? "active" : ""}`)}
                         onClicked={toggleWifi}
                       >
-                        <label label={wifiActive((act) => (act ? "Bật" : "Tắt"))} />
+                        <label label={wifiActive((act) => (act ? t("on") : t("off")))} />
                       </button>
                     </box>
                   </centerbox>
@@ -298,7 +309,7 @@ export default function QuickSettings() {
                                         <box vertical valign={Gtk.Align.CENTER}>
                                           <label label={net.ssid} class="list-title" xalign={0} />
                                           <label
-                                            label={net.inUse ? "Đã kết nối" : `${net.signal}%`}
+                                            label={net.inUse ? t("connected") : `${net.signal}%`}
                                             class="list-subtitle"
                                             xalign={0}
                                           />
@@ -319,7 +330,7 @@ export default function QuickSettings() {
                             </box>
                           ) : (
                             <label
-                              label="Đang quét mạng Wi-Fi..."
+                              label={loc("scanningWifi")}
                               class="cal-date-sub"
                               xalign={0.5}
                               margin={20}
@@ -339,16 +350,16 @@ export default function QuickSettings() {
                   {/* Bluetooth Subview Header */}
                   <centerbox class="qs-subview-header" valign={Gtk.Align.CENTER}>
                     <box $type="start" valign={Gtk.Align.CENTER}>
-                      <button class="qs-icon-btn" onClicked={() => setCurrentView("main")} tooltipText="Quay lại">
+                      <button class="qs-icon-btn" onClicked={() => setCurrentView("main")} tooltipText={loc("back")}>
                         <icon icon="go-previous-symbolic" class="btn-icon" />
                       </button>
-                      <label label="Thiết bị Bluetooth" class="qs-subview-title" />
+                      <label label={loc("btDevices")} class="qs-subview-title" />
                     </box>
                     <box $type="center" />
                     <box $type="end" valign={Gtk.Align.CENTER} spacing={6}>
                       <button
                         class="qs-icon-btn"
-                        tooltipText="Quét thiết bị"
+                        tooltipText={loc("scan")}
                         onClicked={scanBt}
                       >
                         <icon icon="view-refresh-symbolic" class="btn-icon" />
@@ -357,7 +368,7 @@ export default function QuickSettings() {
                         class={btPowered((p) => `qs-pod ${p ? "active" : ""}`)}
                         onClicked={toggleBluetooth}
                       >
-                        <label label={btPowered((p) => (p ? "Bật" : "Tắt"))} />
+                        <label label={btPowered((p) => (p ? t("on") : t("off")))} />
                       </button>
                     </box>
                   </centerbox>
@@ -380,7 +391,7 @@ export default function QuickSettings() {
                                       <box vertical valign={Gtk.Align.CENTER}>
                                         <label label={dev.name} class="list-title" xalign={0} />
                                         <label
-                                          label={dev.connected ? "Đã kết nối" : "Đã ghép nối"}
+                                          label={dev.connected ? t("connected") : t("paired")}
                                           class="list-subtitle"
                                           xalign={0}
                                         />
@@ -389,7 +400,7 @@ export default function QuickSettings() {
                                     <box $type="center" />
                                     <box $type="end" valign={Gtk.Align.CENTER}>
                                       <label
-                                        label={dev.connected ? "Ngắt" : "Kết nối"}
+                                        label={dev.connected ? t("disconnect") : t("connect")}
                                         class="notif-clear-btn"
                                       />
                                     </box>
@@ -399,7 +410,7 @@ export default function QuickSettings() {
                             </box>
                           ) : (
                             <label
-                              label="Không tìm thấy thiết bị nào"
+                              label={t("noBtDevices")}
                               class="cal-date-sub"
                               xalign={0.5}
                               margin={20}
@@ -428,28 +439,28 @@ export default function QuickSettings() {
                   <box $type="end" halign={Gtk.Align.END} valign={Gtk.Align.CENTER}>
                     <button
                       class="qs-icon-btn"
-                      tooltipText="Lock Screen"
+                      tooltipText={loc("lock")}
                       onClicked={() => execAsync("loginctl lock-session").catch(console.error)}
                     >
                       <icon icon="system-lock-screen-symbolic" class="btn-icon" />
                     </button>
                     <button
                       class="qs-icon-btn"
-                      tooltipText="Settings"
-                      onClicked={() => execAsync("gnome-control-center").catch(console.error)}
+                      tooltipText={loc("settings")}
+                      onClicked={openAmeliaSettings}
                     >
                       <icon icon="emblem-system-symbolic" class="btn-icon" />
                     </button>
                     <button
                       class="qs-icon-btn"
-                      tooltipText="Power Off"
+                      tooltipText={loc("powerOff")}
                       onClicked={() => execAsync("systemctl poweroff").catch(console.error)}
                     >
                       <icon icon="system-shutdown-symbolic" class="btn-icon" />
                     </button>
                     <button
                       class="qs-icon-btn"
-                      tooltipText="Collapse"
+                      tooltipText={loc("collapse")}
                       onClicked={() => app.toggle_window("quicksettings")}
                     >
                       <icon icon="go-down-symbolic" class="btn-icon" />
@@ -472,7 +483,7 @@ export default function QuickSettings() {
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="network-wireless-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label="Wi-Fi" class="pod-title" xalign={0} />
+                          <label label={loc("wifi")} class="pod-title" xalign={0} />
                           <label label={wifiSsid} class="pod-subtitle" xalign={0} maxWidthChars={8} ellipsize={3} />
                         </box>
                         <icon icon="go-next-symbolic" class="pod-chevron" />
@@ -490,7 +501,7 @@ export default function QuickSettings() {
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="bluetooth-active-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label="Bluetooth" class="pod-title" xalign={0} />
+                          <label label={loc("bluetooth")} class="pod-title" xalign={0} />
                           <label label={btStatusText} class="pod-subtitle" xalign={0} />
                         </box>
                         <icon icon="go-next-symbolic" class="pod-chevron" />
@@ -505,8 +516,8 @@ export default function QuickSettings() {
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="airplane-mode-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label="Chế độ máy bay" class="pod-title" xalign={0} maxWidthChars={10} ellipsize={3} />
-                          <label label={airplaneMode((act) => (act ? "Bật" : "Tắt"))} class="pod-subtitle" xalign={0} />
+                          <label label={loc("airplaneMode")} class="pod-title" xalign={0} maxWidthChars={10} ellipsize={3} />
+                          <label label={airplaneMode((act) => (act ? t("on") : t("off")))} class="pod-subtitle" xalign={0} />
                         </box>
                       </box>
                     </button>
@@ -517,28 +528,28 @@ export default function QuickSettings() {
                     {/* Screen Capture Pod */}
                     <button
                       class="qs-pod"
-                      tooltipText="Launch Screenshot Tool"
+                      tooltipText={loc("snippingTool")}
                       onClicked={triggerScreenCapture}
                     >
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="camera-photo-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label="Screen Capture" class="pod-title" xalign={0} />
-                          <label label="Snipping tool" class="pod-subtitle" xalign={0} />
+                          <label label={loc("screenCapture")} class="pod-title" xalign={0} />
+                          <label label={loc("snippingTool")} class="pod-subtitle" xalign={0} />
                         </box>
                       </box>
                     </button>
 
                     {/* Dark Theme Pod */}
                     <button
-                      class={darkMode((act) => `qs-pod ${act ? "active" : ""}`)}
+                      class={themeMode((m) => `qs-pod ${m === "dark" ? "active" : ""}`)}
                       onClicked={toggleDarkMode}
                     >
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="weather-clear-night-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label="Dark Theme" class="pod-title" xalign={0} />
-                          <label label={darkMode((act) => (act ? "On" : "Off"))} class="pod-subtitle" xalign={0} />
+                          <label label={loc("darkTheme")} class="pod-title" xalign={0} />
+                          <label label={themeMode((m) => (m === "dark" ? t("on") : t("off")))} class="pod-subtitle" xalign={0} />
                         </box>
                       </box>
                     </button>
@@ -551,8 +562,8 @@ export default function QuickSettings() {
                       <box valign={Gtk.Align.CENTER}>
                         <icon icon="notifications-disabled-symbolic" class="pod-icon" />
                         <box vertical valign={Gtk.Align.CENTER} hexpand>
-                          <label label="Do Not Disturb" class="pod-title" xalign={0} />
-                          <label label={dndActive((act) => (act ? "Silent" : "Off"))} class="pod-subtitle" xalign={0} />
+                          <label label={loc("doNotDisturb")} class="pod-title" xalign={0} />
+                          <label label={dndActive((act) => (act ? t("silent") : t("off")))} class="pod-subtitle" xalign={0} />
                         </box>
                       </box>
                     </button>
@@ -563,7 +574,7 @@ export default function QuickSettings() {
                 <box vertical spacing={4}>
                   {/* Volume Slider with Mute Button */}
                   <box class="qs-slider-row" valign={Gtk.Align.CENTER}>
-                    <button class="slider-mute-btn" onClicked={toggleMute} tooltipText="Bật/Tắt âm">
+                    <button class="slider-mute-btn" onClicked={toggleMute} tooltipText={loc("mute")}>
                       <icon
                         icon={isMuted((m) =>
                           m ? "audio-volume-muted-symbolic" : "audio-volume-high-symbolic"

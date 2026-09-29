@@ -4,9 +4,9 @@ $font-family: "Roboto", sans-serif;
 // MD3 Tonal Dark Colors (Authentic Google ChromeOS Material You)
 $surface-base: #141218;
 $surface-dim: #110f14;
-$surface-container: rgba(33, 31, 38, 0.92);
-$surface-container-high: rgba(43, 41, 48, 0.96);
-$surface-container-highest: rgba(54, 52, 59, 0.98);
+$surface-container: rgba(28, 27, 31, 0.98);
+$surface-container-high: rgba(43, 41, 48, 0.98);
+$surface-container-highest: rgba(54, 52, 59, 1.0);
 
 $primary: #a8c7fa;                  // Google MD3 Blue 200
 $on-primary: #062e6f;               // Dark Blue on Primary
@@ -761,5 +761,205 @@ $active-tint: rgba(255, 255, 255, 0.12);
       .list-title { color: #0b57d0; }
     }
   }
+
+  .settings-nav-sidebar {
+    border-right-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .settings-nav-btn {
+    &:hover { background-color: rgba(0, 0, 0, 0.06); }
+    &.active {
+      background-color: rgba(11, 87, 208, 0.14);
+      .nav-label { color: #0b57d0; }
+      .nav-icon { color: #0b57d0; }
+    }
+  }
+
+  .settings-section-card {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .option-pill-btn {
+    background-color: rgba(0, 0, 0, 0.06);
+    &.active {
+      background-color: #0b57d0;
+      label { color: #ffffff; }
+    }
+  }
 }
+
+// -------------------------------------------------------------
+// 8. AMELIA SHELL CONFIGURATION WINDOW
+// -------------------------------------------------------------
+.SettingsWindow {
+  background: transparent;
+}
+
+.settings-card {
+  background: rgba(30, 29, 36, 0.98);
+  border: 1px solid $outline;
+  border-radius: 28px;
+  padding: 24px;
+  min-width: 680px;
+  min-height: 480px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.settings-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .settings-title-icon {
+    font-size: 22px;
+    color: $primary;
+  }
+  .settings-title {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.settings-nav-sidebar {
+  min-width: 170px;
+  padding-right: 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-nav-btn {
+  padding: 10px 14px;
+  border-radius: 9999px;
+  transition: all 150ms ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  &.active {
+    background-color: $active-pill;
+    .nav-label {
+      color: $primary;
+      font-weight: 500;
+    }
+    .nav-icon {
+      color: $primary;
+    }
+  }
+
+  .nav-icon {
+    font-size: 18px;
+    color: $on-surface-variant;
+  }
+
+  .nav-label {
+    font-size: 13px;
+    color: $on-surface;
+  }
+}
+
+.settings-content-pane {
+  padding: 4px 8px;
+}
+
+.settings-section-card {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 16px;
+
+  .setting-heading {
+    font-size: 14px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+
+  .setting-subtext {
+    font-size: 12px;
+    color: $on-surface-variant;
+    margin-top: 2px;
+  }
+}
+
+.option-pill-btn {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  transition: all 150ms ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+
+  &.active {
+    background-color: $primary;
+    label {
+      color: $on-primary;
+      font-weight: 500;
+    }
+  }
+}
+
+.accent-color-chip {
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  transition: all 150ms ease;
+
+  &.selected {
+    border-color: #ffffff;
+  }
+}
+
+.shortcut-row {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 10px 14px;
+
+  .shortcut-key {
+    font-size: 12px;
+    font-weight: 500;
+    color: $primary;
+  }
+  .shortcut-desc {
+    font-size: 12px;
+    color: $on-surface-variant;
+  }
+}
+
+.action-btn {
+  background-color: $primary;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  transition: all 150ms ease;
+
+  &:hover {
+    background-color: #c2e7ff;
+  }
+
+  label {
+    color: $on-primary;
+    font-weight: 500;
+  }
+  .btn-icon {
+    font-size: 16px;
+    color: $on-primary;
+  }
+}
+
+.about-logo {
+  font-size: 42px;
+  color: $primary;
+}
+
+.about-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: $on-surface;
+}
+
+.about-version {
+  font-size: 13px;
+  color: $primary;
+}
+
 
