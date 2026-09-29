@@ -8,7 +8,8 @@ import Battery from "gi://AstalBattery"
 import Wp from "gi://AstalWp"
 import { toggleExclusive } from "../lib/window_manager"
 import { loc } from "../lib/i18n"
-import { clock24h, themeMode, language } from "../lib/settings"
+import { clock24h, themeMode, language, shelfHeight, pinnedApps, PinnedApp } from "../lib/settings"
+import { With } from "ags"
 
 export default function Shelf(gdkmonitor: Gdk.Monitor) {
   const { BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor
@@ -63,14 +64,6 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
   const batteryPercent = createBinding(battery, "percentage")((pct) => `${Math.round(pct * 100)}%`)
   const batteryIcon = createBinding(battery, "icon_name")
 
-  // Pinned Apps definitions
-  const pinnedApps = [
-    { name: "Terminal", icon: "org.gnome.Ptyxis", cmd: "ptyxis" },
-    { name: "Browser", icon: "google-chrome", cmd: "google-chrome || chromium || firefox" },
-    { name: "Files", icon: "org.gnome.Nautilus", cmd: "nautilus" },
-    { name: "Amelia Settings", icon: "emblem-system-symbolic", cmd: "settings" },
-  ]
-
   const handleAppClick = (cmd: string) => {
     if (cmd === "settings") {
       toggleExclusive("settings")
@@ -88,7 +81,7 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
       anchor={BOTTOM | LEFT | RIGHT}
       application={app}
     >
-      <centerbox class="shelf-box">
+      <centerbox class="shelf-box" css={shelfHeight((h) => `min-height: ${h}px;`)}>
         {/* Left: App Launcher button */}
         <box $type="start" halign={Gtk.Align.START} valign={Gtk.Align.CENTER}>
           <button
@@ -103,16 +96,22 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
 
         {/* Center: Pinned application icons */}
         <box $type="center" halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-          {pinnedApps.map((appDef) => (
-            <button
-              class="shelf-app-item"
-              tooltipText={appDef.name}
-              onClicked={() => handleAppClick(appDef.cmd)}
-              valign={Gtk.Align.CENTER}
-            >
-              <icon icon={appDef.icon} class="app-icon" />
-            </button>
-          ))}
+          <With value={pinnedApps}>
+            {(appsList) => (
+              <box spacing={4} valign={Gtk.Align.CENTER}>
+                {appsList.map((appDef) => (
+                  <button
+                    class="shelf-app-item"
+                    tooltipText={appDef.name}
+                    onClicked={() => handleAppClick(appDef.cmd)}
+                    valign={Gtk.Align.CENTER}
+                  >
+                    <icon icon={appDef.icon} class="app-icon" />
+                  </button>
+                ))}
+              </box>
+            )}
+          </With>
         </box>
 
         {/* Right: ChromeOS Status Area Pills */}

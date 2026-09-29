@@ -25,11 +25,21 @@ export default function Calendar() {
 
   const timeNowStr = createPoll("", 1000, "date +'%H:%M'")
 
+  // Real-time current day poll (checks every 30s to guarantee midnight rollover)
+  const currentDay = createPoll(new Date(), 30000, () => new Date())
+
   // Calendar month/year navigation state
-  const today = new Date()
+  const initialToday = new Date()
   const [viewDate, setViewDate] = createState({
-    year: today.getFullYear(),
-    month: today.getMonth(), // 0-indexed
+    year: initialToday.getFullYear(),
+    month: initialToday.getMonth(), // 0-indexed
+  })
+
+  // Selected date state
+  const [selectedDate, setSelectedDate] = createState({
+    year: initialToday.getFullYear(),
+    month: initialToday.getMonth(),
+    day: initialToday.getDate(),
   })
 
   const prevMonth = () => {
@@ -53,6 +63,7 @@ export default function Calendar() {
   const resetToday = () => {
     const now = new Date()
     setViewDate({ year: now.getFullYear(), month: now.getMonth() })
+    setSelectedDate({ year: now.getFullYear(), month: now.getMonth(), day: now.getDate() })
   }
 
   const monthNamesEn = [
@@ -146,32 +157,26 @@ export default function Calendar() {
               const daysInMonth = new Date(vd.year, vd.month + 1, 0).getDate()
               const daysInPrevMonth = new Date(vd.year, vd.month, 0).getDate()
 
-              const cells: { num: number; currentMonth: boolean; isToday: boolean }[] = []
+              const cells: { num: number; currentMonth: boolean }[] = []
 
               // Previous month trailing days
               for (let i = startDayIndex - 1; i >= 0; i--) {
                 cells.push({
                   num: daysInPrevMonth - i,
                   currentMonth: false,
-                  isToday: false,
                 })
               }
 
               // Current month days
-              const realToday = new Date()
               for (let d = 1; d <= daysInMonth; d++) {
-                const isToday =
-                  realToday.getFullYear() === vd.year &&
-                  realToday.getMonth() === vd.month &&
-                  realToday.getDate() === d
-                cells.push({ num: d, currentMonth: true, isToday })
+                cells.push({ num: d, currentMonth: true })
               }
 
               // Next month leading days to complete 35 or 42 cells
               const totalCells = cells.length > 35 ? 42 : 35
               const nextDays = totalCells - cells.length
               for (let n = 1; n <= nextDays; n++) {
-                cells.push({ num: n, currentMonth: false, isToday: false })
+                cells.push({ num: n, currentMonth: false })
               }
 
               // Group into 7 columns per row
@@ -184,17 +189,50 @@ export default function Calendar() {
                 <box vertical spacing={2}>
                   {rows.map((row) => (
                     <box spacing={2} homogeneous>
-                      {row.map((c) => (
-                        <button
-                          class={`cal-day-cell ${c.isToday ? "today" : ""} ${
-                            !c.currentMonth ? "other-month" : ""
-                          }`}
-                          halign={Gtk.Align.CENTER}
-                          valign={Gtk.Align.CENTER}
-                        >
-                          <label label={String(c.num)} class="day-num" />
-                        </button>
-                      ))}
+                      {row.map((c) => {
+                        const isTodayBinding = currentDay((now) => {
+                          return (
+                            c.currentMonth &&
+                            now.getFullYear() === vd.year &&
+                            now.getMonth() === vd.month &&
+                            now.getDate() === c.num
+                          )
+                        })
+
+                        const isSelectedBinding = selectedDate((sel) => {
+                          return (
+                            c.currentMonth &&
+                            sel.year === vd.year &&
+                            sel.month === vd.month &&
+                            sel.day === c.num
+                          )
+                        })
+
+                        const cellClass = isTodayBinding((isTod) =>
+                          isSelectedBinding((isSel) => {
+                            let cls = "cal-day-cell"
+                            if (isTod) cls += " today"
+                            if (isSel) cls += " selected"
+                            if (!c.currentMonth) cls += " other-month"
+                            return cls
+                          })
+                        )
+
+                        return (
+                          <button
+                            class={cellClass}
+                            halign={Gtk.Align.CENTER}
+                            valign={Gtk.Align.CENTER}
+                            onClicked={() => {
+                              if (c.currentMonth) {
+                                setSelectedDate({ year: vd.year, month: vd.month, day: c.num })
+                              }
+                            }}
+                          >
+                            <label label={String(c.num)} class="day-num" />
+                          </button>
+                        )
+                      })}
                     </box>
                   ))}
                 </box>
@@ -234,13 +272,32 @@ export default function Calendar() {
                     {notifs.map((n) => (
                       <box class="notif-item" vertical>
                         <centerbox>
-                          <label label={n.summary} class="notif-title" $type="start" xalign={0} ellipsize={3} />
+                          <box $type="start" hexpand valign={Gtk.Align.CENTER}>
+                            <label label={n.summary} class="notif-title" xalign={0} ellipsize={3} />
+                          </box>
                           <box $type="center" />
-                          <button class="qs-icon-btn" valign={Gtk.Align.CENTER} onClicked={() => n.dismiss()} $type="end">
+                          <button
+                            class="qs-icon-btn"
+                            valign={Gtk.Align.CENTER}
+                            onClicked={() => n.dismiss()}
+                            $type="end"
+                            tooltipText="Dismiss"
+                          >
                             <icon icon="window-close-symbolic" class="btn-icon" />
                           </button>
                         </centerbox>
                         {n.body ? <label label={n.body} class="notif-body" xalign={0} wrap /> : <box />}
+                        {n.actions && n.actions.length > 0 ? (
+                          <box spacing={4}>
+                            {n.actions.map((act) => (
+                              <button class="notif-action-btn" onClicked={() => n.invoke(act.id)}>
+                                <label label={act.label} />
+                              </button>
+                            ))}
+                          </box>
+                        ) : (
+                          <box />
+                        )}
                       </box>
                     ))}
                   </box>

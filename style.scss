@@ -305,11 +305,18 @@ $active-tint: rgba(255, 255, 255, 0.12);
   margin-top: 8px;
 
   .media-art {
-    min-width: 44px;
-    min-height: 44px;
-    border-radius: 12px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 14px;
     background-color: rgba(255, 255, 255, 0.08);
+    background-size: cover;
+    background-position: center;
     margin-right: 12px;
+
+    .media-art-icon {
+      font-size: 22px;
+      color: $primary;
+    }
   }
 
   .media-title {
@@ -327,16 +334,60 @@ $active-tint: rgba(255, 255, 255, 0.12);
   .media-ctrl-btn {
     min-width: 32px;
     min-height: 32px;
+    padding: 0;
     border-radius: 9999px;
     margin-left: 4px;
+    transition: all 150ms ease;
 
     &:hover {
       background-color: $hover-tint;
     }
 
+    &.primary {
+      background-color: rgba(168, 199, 250, 0.18);
+      min-width: 36px;
+      min-height: 36px;
+      &:hover {
+        background-color: rgba(168, 199, 250, 0.3);
+      }
+      .ctrl-icon {
+        color: $primary;
+      }
+    }
+
     .ctrl-icon {
       font-size: 16px;
       color: $on-surface;
+    }
+  }
+
+  .media-progress-box {
+    margin-top: 8px;
+
+    scale {
+      min-height: 16px;
+      trough {
+        min-height: 4px;
+        background-color: rgba(255, 255, 255, 0.12);
+        border-radius: 9999px;
+      }
+      highlight {
+        min-height: 4px;
+        background-color: $primary;
+        border-radius: 9999px;
+      }
+      slider {
+        min-width: 8px;
+        min-height: 8px;
+        margin: -2px 0;
+        background-color: $primary;
+        border-radius: 9999px;
+      }
+    }
+
+    .media-time-label {
+      font-size: 10px;
+      color: $on-surface-variant;
     }
   }
 }
@@ -407,6 +458,38 @@ $active-tint: rgba(255, 255, 255, 0.12);
   }
 }
 
+// Action card for terminal run or web open
+.launcher-action-card {
+  background-color: rgba(168, 199, 250, 0.12);
+  border: 1px solid rgba(168, 199, 250, 0.25);
+  border-radius: 16px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  transition: all 150ms ease;
+
+  &:hover, &.selected {
+    background-color: rgba(168, 199, 250, 0.22);
+    border-color: $primary;
+  }
+
+  .action-icon {
+    font-size: 20px;
+    color: $primary;
+    margin-right: 12px;
+  }
+
+  .action-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+
+  .action-subtitle {
+    font-size: 11px;
+    color: $on-surface-variant;
+  }
+}
+
 // Apps Grid
 .launcher-apps-scroll {
   min-height: 380px;
@@ -418,6 +501,7 @@ $active-tint: rgba(255, 255, 255, 0.12);
   border-radius: 18px;
   padding: 10px 4px;
   margin: 4px;
+  border: 1px solid transparent;
   transition: all 180ms cubic-bezier(0.2, 0, 0, 1);
 
   &:hover {
@@ -425,6 +509,11 @@ $active-tint: rgba(255, 255, 255, 0.12);
   }
   &:active {
     background-color: rgba(255, 255, 255, 0.14);
+  }
+
+  &.selected {
+    background-color: rgba(168, 199, 250, 0.22);
+    border-color: rgba(168, 199, 250, 0.45);
   }
 
   .grid-app-icon {
@@ -436,6 +525,12 @@ $active-tint: rgba(255, 255, 255, 0.12);
     font-size: 12px;
     font-weight: 400; // Regular
     color: $on-surface;
+  }
+
+  .app-pin-indicator {
+    font-size: 11px;
+    color: $primary;
+    margin-top: 2px;
   }
 }
 
@@ -596,6 +691,138 @@ $active-tint: rgba(255, 255, 255, 0.12);
   }
 }
 
+.qs-connecting-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: $primary;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background-color: rgba(168, 199, 250, 0.16);
+}
+
+.qs-error-banner {
+  background-color: rgba(242, 184, 181, 0.15);
+  border: 1px solid rgba(242, 184, 181, 0.35);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+
+  .error-icon {
+    font-size: 16px;
+    color: #f2b8b5;
+    margin-right: 8px;
+  }
+  .error-text {
+    font-size: 12px;
+    color: #f2b8b5;
+  }
+  .error-close-btn {
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
+    border-radius: 9999px;
+    &:hover { background-color: rgba(242, 184, 181, 0.2); }
+    .btn-icon {
+      font-size: 14px;
+      color: #f2b8b5;
+    }
+  }
+}
+
+.qs-auth-card {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+
+  .auth-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: $on-surface;
+    margin-bottom: 8px;
+  }
+
+  .auth-entry-box {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+
+    entry {
+      color: $on-surface;
+      font-size: 13px;
+    }
+  }
+
+  .auth-action-btn {
+    border-radius: 9999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 150ms ease;
+
+    &.primary {
+      background-color: $primary;
+      label { color: $on-primary; }
+    }
+    &.cancel {
+      background-color: rgba(255, 255, 255, 0.08);
+      label { color: $on-surface; }
+    }
+  }
+}
+
+.qs-power-card {
+  background: rgba(40, 39, 46, 0.95);
+  border: 1px solid $outline;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  .power-heading {
+    font-size: 15px;
+    font-weight: 500;
+    color: $on-surface;
+    margin-bottom: 2px;
+  }
+
+  .power-subtext {
+    font-size: 12px;
+    color: $on-surface-variant;
+    margin-bottom: 12px;
+  }
+
+  .power-opt-btn {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 10px 8px;
+    transition: all 150ms ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &.danger {
+      &:hover {
+        background-color: rgba(242, 184, 181, 0.22);
+        .power-btn-label, .power-btn-icon { color: #f2b8b5; }
+      }
+    }
+
+    .power-btn-icon {
+      font-size: 20px;
+      color: $on-surface;
+      margin-bottom: 4px;
+    }
+    .power-btn-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: $on-surface;
+    }
+  }
+}
+
 .qs-subview-scroll {
   min-height: 200px;
 }
@@ -709,12 +936,48 @@ $active-tint: rgba(255, 255, 255, 0.12);
     }
   }
 
+  &.selected {
+    border: 2px solid $primary;
+    background-color: rgba(168, 199, 250, 0.18);
+    .day-num {
+      color: $primary;
+      font-weight: 600;
+    }
+  }
+
+  &.today.selected {
+    background-color: $primary;
+    border-color: #ffffff;
+    .day-num {
+      color: $on-primary;
+    }
+  }
+
   &.other-month {
     opacity: 0.35;
   }
 
   .day-num {
     font-size: 12px;
+  }
+}
+
+.notif-action-btn {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  padding: 4px 10px;
+  margin-right: 6px;
+  margin-top: 6px;
+  transition: all 150ms ease;
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    color: $primary;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.14);
   }
 }
 
@@ -846,6 +1109,74 @@ $active-tint: rgba(255, 255, 255, 0.12);
       background-color: rgba(11, 87, 208, 0.12);
       .list-title { color: #0b57d0; }
     }
+  }
+
+  .qs-auth-card {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+    .auth-title { color: #1d1b20; }
+    .auth-entry-box {
+      background-color: rgba(0, 0, 0, 0.06);
+      entry { color: #1d1b20; }
+    }
+    .auth-action-btn.primary {
+      background-color: #0b57d0;
+      label { color: #ffffff; }
+    }
+    .auth-action-btn.cancel {
+      background-color: rgba(0, 0, 0, 0.06);
+      label { color: #1d1b20; }
+    }
+  }
+
+  .qs-power-card {
+    background-color: rgba(245, 242, 248, 0.98);
+    border-color: rgba(0, 0, 0, 0.10);
+    .power-heading { color: #1d1b20; }
+    .power-subtext { color: #49454f; }
+    .power-opt-btn {
+      background-color: rgba(0, 0, 0, 0.05);
+      &:hover { background-color: rgba(0, 0, 0, 0.10); }
+      .power-btn-icon, .power-btn-label { color: #1d1b20; }
+      &.danger:hover {
+        background-color: rgba(179, 38, 30, 0.12);
+        .power-btn-icon, .power-btn-label { color: #b3261e; }
+      }
+    }
+  }
+
+  .qs-media-card {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+    .media-title { color: #1d1b20; }
+    .media-artist { color: #49454f; }
+    .media-art {
+      background-color: rgba(0, 0, 0, 0.06);
+      .media-art-icon { color: #0b57d0; }
+    }
+    .media-ctrl-btn.primary {
+      background-color: rgba(11, 87, 208, 0.12);
+      .ctrl-icon { color: #0b57d0; }
+    }
+    .media-progress-box {
+      scale {
+        trough { background-color: rgba(0, 0, 0, 0.10); }
+        highlight, slider { background-color: #0b57d0; }
+      }
+      .media-time-label { color: #49454f; }
+    }
+  }
+
+  .cal-day-cell.selected {
+    border-color: #0b57d0;
+    background-color: rgba(11, 87, 208, 0.14);
+    .day-num { color: #0b57d0; }
+  }
+
+  .notif-action-btn {
+    background-color: rgba(0, 0, 0, 0.06);
+    label { color: #0b57d0; }
+    &:hover { background-color: rgba(0, 0, 0, 0.10); }
   }
 
   .settings-nav-sidebar {

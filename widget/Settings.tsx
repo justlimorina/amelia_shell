@@ -13,6 +13,8 @@ import {
   setClock24h,
   shelfHeight,
   setShelfHeight,
+  pinnedApps,
+  togglePinApp,
 } from "../lib/settings"
 import { loc } from "../lib/i18n"
 
@@ -264,6 +266,42 @@ export default function Settings() {
                           >
                             <label label="Comfortable (64px)" />
                           </button>
+                        </box>
+                      </box>
+
+                      {/* Pinned Applications Management */}
+                      <box class="settings-section-card" vertical spacing={8}>
+                        <label label="Pinned Applications" class="setting-heading" xalign={0} />
+                        <label label="Manage applications pinned to the bottom shelf" class="setting-subtext" xalign={0} />
+                        <box vertical spacing={6} css="margin-top: 8px;">
+                          <With value={pinnedApps}>
+                            {(apps) =>
+                              apps.length > 0 ? (
+                                <box vertical spacing={6}>
+                                  {apps.map((appItem) => (
+                                    <centerbox class="qs-list-item" valign={Gtk.Align.CENTER}>
+                                      <box $type="start" valign={Gtk.Align.CENTER} spacing={8}>
+                                        <icon icon={appItem.icon} class="list-icon" />
+                                        <label label={appItem.name} class="list-title" />
+                                      </box>
+                                      <box $type="center" />
+                                      <button
+                                        class="qs-icon-btn"
+                                        valign={Gtk.Align.CENTER}
+                                        $type="end"
+                                        tooltipText="Unpin from Shelf"
+                                        onClicked={() => togglePinApp(appItem)}
+                                      >
+                                        <icon icon="window-close-symbolic" class="btn-icon" />
+                                      </button>
+                                    </centerbox>
+                                  ))}
+                                </box>
+                              ) : (
+                                <label label="No pinned applications" class="cal-date-sub" xalign={0} />
+                              )
+                            }
+                          </With>
                         </box>
                       </box>
                     </box>

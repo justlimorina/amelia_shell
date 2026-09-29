@@ -2,6 +2,12 @@ import { createState } from "ags"
 import GLib from "gi://GLib"
 import Gio from "gi://Gio"
 
+export interface PinnedApp {
+  name: string
+  icon: string
+  cmd: string
+}
+
 export interface AmeliaConfig {
   language: "en" | "vi"
   themeMode: "dark" | "light"
@@ -9,6 +15,7 @@ export interface AmeliaConfig {
   clock24h: boolean
   shelfHeight: number
   cornerRadius: number
+  pinnedApps: PinnedApp[]
 }
 
 const DEFAULT_CONFIG: AmeliaConfig = {
@@ -18,6 +25,12 @@ const DEFAULT_CONFIG: AmeliaConfig = {
   clock24h: true,
   shelfHeight: 56,
   cornerRadius: 28,
+  pinnedApps: [
+    { name: "Terminal", icon: "org.gnome.Ptyxis", cmd: "ptyxis" },
+    { name: "Browser", icon: "google-chrome", cmd: "google-chrome || chromium || firefox" },
+    { name: "Files", icon: "org.gnome.Nautilus", cmd: "nautilus" },
+    { name: "Settings", icon: "emblem-system-symbolic", cmd: "settings" },
+  ],
 }
 
 const CONFIG_DIR = GLib.build_filenamev([GLib.get_user_config_dir(), "amelia"])
@@ -29,7 +42,11 @@ function loadInitialConfig(): AmeliaConfig {
     if (file.query_exists(null)) {
       const [, contents] = file.load_contents(null)
       const parsed = JSON.parse(new TextDecoder("utf-8").decode(contents))
-      return { ...DEFAULT_CONFIG, ...parsed }
+      return {
+        ...DEFAULT_CONFIG,
+        ...parsed,
+        pinnedApps: Array.isArray(parsed?.pinnedApps) ? parsed.pinnedApps : DEFAULT_CONFIG.pinnedApps,
+      }
     }
   } catch (err) {
     console.error("Failed to load settings.json, using defaults:", err)
@@ -66,6 +83,7 @@ export const [accentColor, setAccentColorState] = createState<string>(initial.ac
 export const [clock24h, setClock24hState] = createState<boolean>(initial.clock24h)
 export const [shelfHeight, setShelfHeightState] = createState<number>(initial.shelfHeight)
 export const [cornerRadius, setCornerRadiusState] = createState<number>(initial.cornerRadius)
+export const [pinnedApps, setPinnedAppsState] = createState<PinnedApp[]>(initial.pinnedApps)
 
 function persistCurrent() {
   saveConfigToFile({
@@ -75,7 +93,23 @@ function persistCurrent() {
     clock24h: clock24h(),
     shelfHeight: shelfHeight(),
     cornerRadius: cornerRadius(),
+    pinnedApps: pinnedApps(),
   })
+}
+
+export function togglePinApp(appDef: PinnedApp) {
+  const current = pinnedApps()
+  const exists = current.some((a) => a.cmd === appDef.cmd || a.name === appDef.name)
+  if (exists) {
+    setPinnedAppsState(current.filter((a) => a.cmd !== appDef.cmd && a.name !== appDef.name))
+  } else {
+    setPinnedAppsState([...current, appDef])
+  }
+  persistCurrent()
+}
+
+export function isAppPinned(cmd: string, name: string): boolean {
+  return pinnedApps().some((a) => a.cmd === cmd || a.name === name)
 }
 
 export function setLanguage(lang: "en" | "vi") {
