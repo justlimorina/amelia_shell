@@ -3,8 +3,9 @@ import { Astal, Gtk, Gdk } from "ags/gtk3"
 import { createState, createBinding, With } from "ags"
 import { execAsync } from "ags/process"
 import Apps from "gi://AstalApps"
+import GLib from "gi://GLib"
 import { themeMode, togglePinApp, isAppPinned, pinnedApps } from "../lib/settings"
-import { loc } from "../lib/i18n"
+import { loc, t } from "../lib/i18n"
 import { evaluateSafeMath } from "../lib/calculator"
 
 export default function Launcher() {
@@ -14,12 +15,19 @@ export default function Launcher() {
   const [query, setQuery] = createState("")
   const [calcResult, setCalcResult] = createState<string | null>(null)
   const [selectedIndex, setSelectedIndex] = createState(0)
+  const [fileMatches, setFileMatches] = createState<string[]>([])
+  const [searchedFileTerm, setSearchedFileTerm] = createState("")
+  const [isSearchingFiles, setIsSearchingFiles] = createState(false)
+  const [fileSearchError, setFileSearchError] = createState<string | null>(null)
 
   let searchEntryWidget: Gtk.Entry | null = null
 
   const handleSearchChange = (text: string) => {
     setQuery(text)
     setSelectedIndex(0)
+    setFileMatches([])
+    setSearchedFileTerm("")
+    setFileSearchError(null)
 
     // Evaluate math safely without eval or new Function
     const res = evaluateSafeMath(text)
@@ -33,7 +41,7 @@ export default function Launcher() {
       return appsService.list.slice(0, 30)
     }
     // If command or URL, don't show fuzzy app results unless standard search
-    if (trimmed.startsWith(">") || isUrl(trimmed)) {
+    if (trimmed.startsWith(">") || trimmed.startsWith("?") || isUrl(trimmed)) {
       return []
     }
     return appsService.fuzzy_query(trimmed).slice(0, 25)
@@ -69,12 +77,52 @@ export default function Launcher() {
     app.toggle_window("launcher")
   }
 
+  const searchFiles = async (text: string) => {
+    const term = text.trim().replace(/^\?\s*/, "")
+    if (!term || isSearchingFiles()) return
+    setIsSearchingFiles(true)
+    setFileSearchError(null)
+    setFileMatches([])
+    setSearchedFileTerm("")
+    const home = GLib.get_home_dir()
+    const filePattern = `*${term.replace(/[\\*?\[\]]/g, "\\$&")}*`
+    try {
+      const out = await execAsync([
+        "find", home, "-maxdepth", "5", "-type", "d",
+        "(", "-name", ".cache", "-o", "-name", ".local", "-o", "-name", "node_modules", "-o", "-name", ".config", ")",
+        "-prune", "-o", "-type", "f", "-iname", filePattern, "-print",
+      ])
+      if (query().trim().replace(/^\?\s*/, "") !== term) return
+      setFileMatches(out.split("\n").map((path) => path.trim()).filter(Boolean).slice(0, 12))
+      setSearchedFileTerm(term)
+    } catch (err) {
+      console.error("File search failed:", err)
+      setFileSearchError(t("fileSearchFailed"))
+    } finally {
+      setIsSearchingFiles(false)
+    }
+  }
+
+  const openFile = (path: string) => {
+    execAsync(["gio", "open", path]).then(() => {
+      app.toggle_window("launcher")
+    }).catch((err) => {
+      console.error("Could not open file:", err)
+      setFileSearchError(t("fileOpenFailed"))
+    })
+  }
+
   const handleEntryActivate = () => {
     const q = query().trim()
 
     // 1. Terminal command
     if (q.startsWith(">")) {
       runTerminalCommand(q)
+      return
+    }
+
+    if (q.startsWith("?")) {
+      void searchFiles(q)
       return
     }
 
@@ -114,6 +162,14 @@ export default function Launcher() {
       }
       if (keyval === Gdk.KEY_Up) {
         setSelectedIndex((cur) => Math.max(cur - 5, 0))
+        return true
+      }
+      if (keyval === Gdk.KEY_Right) {
+        setSelectedIndex((cur) => Math.min(cur + 1, currentList.length - 1))
+        return true
+      }
+      if (keyval === Gdk.KEY_Left) {
+        setSelectedIndex((cur) => Math.max(cur - 1, 0))
         return true
       }
       if (keyval === Gdk.KEY_Tab) {
@@ -211,6 +267,46 @@ export default function Launcher() {
               <box />
             )
           }
+        </With>
+
+        {/* Search local files with the ? prefix, for example: ? report */}
+        <With value={query}>
+          {(q) => q.trim().startsWith("?") ? (
+            <box class="launcher-file-search" vertical spacing={6}>
+              <button class="launcher-action-card" onClicked={() => void searchFiles(query())} sensitive={isSearchingFiles((s) => !s)}>
+                <box valign={Gtk.Align.CENTER}>
+                  <icon icon="system-search-symbolic" class="action-icon" />
+                  <box vertical hexpand>
+                    <label label={isSearchingFiles((searching) => searching ? t("searchingFiles") : t("searchFiles"))} class="action-title" xalign={0} />
+                    <label label={q.trim().slice(1).trim() || t("fileSearchHint")} class="action-subtitle" xalign={0} />
+                  </box>
+                  <icon icon="go-next-symbolic" class="btn-icon" />
+                </box>
+              </button>
+              <With value={fileSearchError}>
+                {(err) => err ? <label label={err} class="action-subtitle" xalign={0} /> : <box />}
+              </With>
+              <With value={fileMatches}>
+                {(matches) => matches.length ? (
+                  <box vertical spacing={4}>
+                    {matches.map((path) => (
+                      <button class="launcher-file-result" onClicked={() => openFile(path)}>
+                        <box vertical>
+                          <label label={path.split("/").pop() || path} class="action-title" xalign={0} ellipsize={3} />
+                          <label label={path} class="action-subtitle" xalign={0} ellipsize={3} />
+                        </box>
+                      </button>
+                    ))}
+                  </box>
+                ) : <box />}
+              </With>
+              <With value={searchedFileTerm}>
+                {(searched) => searched === q.trim().replace(/^\?\s*/, "") && !fileMatches().length && !fileSearchError()
+                  ? <label label={loc("noFilesFound")} class="action-subtitle" xalign={0} />
+                  : <box />}
+              </With>
+            </box>
+          ) : <box />}
         </With>
 
         {/* Scrollable Apps Grid */}

@@ -490,6 +490,16 @@ $active-tint: rgba(255, 255, 255, 0.12);
   }
 }
 
+.launcher-file-result {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 8px 12px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+  }
+}
+
 // Apps Grid
 .launcher-apps-scroll {
   min-height: 380px;
@@ -823,6 +833,25 @@ $active-tint: rgba(255, 255, 255, 0.12);
   }
 }
 
+.cal-events-card {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid $outline;
+  border-radius: 14px;
+  padding: 10px 12px;
+
+  entry {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 7px 10px;
+  }
+
+  .cal-event-row {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    padding: 2px 4px 2px 9px;
+  }
+}
+
 .qs-subview-scroll {
   min-height: 200px;
 }
@@ -1039,6 +1068,11 @@ $active-tint: rgba(255, 255, 255, 0.12);
     background-color: rgba(0, 0, 0, 0.06);
     &:hover { background-color: rgba(0, 0, 0, 0.12); }
     .btn-icon { color: #1d1b20; }
+  }
+
+  .cal-events-card {
+    background-color: rgba(0, 0, 0, 0.03);
+    entry, .cal-event-row { background-color: rgba(0, 0, 0, 0.06); }
   }
 
   .qs-pod {
@@ -1378,5 +1412,3 @@ $active-tint: rgba(255, 255, 255, 0.12);
   font-size: 13px;
   color: $primary;
 }
-
-

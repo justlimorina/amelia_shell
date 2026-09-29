@@ -3,9 +3,49 @@ import { Astal, Gtk } from "ags/gtk3"
 import { createState, createBinding, createMemo, With } from "ags"
 import { createPoll } from "ags/time"
 import Notifd from "gi://AstalNotifd"
+import Gio from "gi://Gio"
+import GLib from "gi://GLib"
 import { language, themeMode } from "../lib/settings"
 import { loc } from "../lib/i18n"
 import { toggleExclusive } from "../lib/window_manager"
+
+interface CalendarEvent {
+  id: number
+  date: string
+  title: string
+}
+
+const eventsPath = GLib.build_filenamev([GLib.get_user_config_dir(), "amelia", "calendar-events.json"])
+
+function loadCalendarEvents(): CalendarEvent[] {
+  try {
+    const file = Gio.File.new_for_path(eventsPath)
+    if (!file.query_exists(null)) return []
+    const [, contents] = file.load_contents(null)
+    const parsed = JSON.parse(new TextDecoder("utf-8").decode(contents))
+    return Array.isArray(parsed)
+      ? parsed.filter((event) => Number.isFinite(event.id) && /^\d{4}-\d{2}-\d{2}$/.test(event.date) && typeof event.title === "string")
+      : []
+  } catch (err) {
+    console.error("Failed to load calendar events:", err)
+    return []
+  }
+}
+
+function saveCalendarEvents(events: CalendarEvent[]) {
+  try {
+    const file = Gio.File.new_for_path(eventsPath)
+    const parent = file.get_parent()
+    if (parent && !parent.query_exists(null)) parent.make_directory_with_parents(null)
+    file.replace_contents(JSON.stringify(events, null, 2), null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null)
+  } catch (err) {
+    console.error("Failed to save calendar events:", err)
+  }
+}
+
+function dateKey(year: number, month: number, day: number) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+}
 
 export default function Calendar() {
   const { BOTTOM, RIGHT } = Astal.WindowAnchor
@@ -41,6 +81,8 @@ export default function Calendar() {
     month: initialToday.getMonth(),
     day: initialToday.getDate(),
   })
+  const [calendarEvents, setCalendarEvents] = createState<CalendarEvent[]>(loadCalendarEvents())
+  const [eventDraft, setEventDraft] = createState("")
 
   // Memoized calendar grid state combining viewDate, selectedDate, and currentDay
   const calendarGridState = createMemo(() => {
@@ -50,6 +92,24 @@ export default function Calendar() {
       now: currentDay(),
     }
   })
+
+  const selectedEventsState = createMemo(() => ({ date: selectedDate(), events: calendarEvents() }))
+
+  const addCalendarEvent = () => {
+    const title = eventDraft().trim()
+    if (!title) return
+    const selected = selectedDate()
+    const next = [...calendarEvents(), { id: Date.now(), date: dateKey(selected.year, selected.month, selected.day), title }]
+    setCalendarEvents(next)
+    saveCalendarEvents(next)
+    setEventDraft("")
+  }
+
+  const removeCalendarEvent = (id: number) => {
+    const next = calendarEvents().filter((event) => event.id !== id)
+    setCalendarEvents(next)
+    saveCalendarEvents(next)
+  }
 
   const prevMonth = () => {
     const cur = viewDate()
@@ -238,6 +298,55 @@ export default function Calendar() {
             }}
           </With>
         </box>
+
+        {/* Local events for the selected date */}
+        <With value={selectedEventsState}>
+          {({ date, events }) => {
+            const key = dateKey(date.year, date.month, date.day)
+            const dayEvents = events.filter((event) => event.date === key)
+            return (
+              <box class="cal-events-card" vertical spacing={6}>
+                <box spacing={5}>
+                  <label label={loc("calendarEvents")} class="notif-section-title" />
+                  <label
+                    label={selectedDate((selected) => new Date(selected.year, selected.month, selected.day).toLocaleDateString(
+                      language() === "vi" ? "vi-VN" : "en-US",
+                      { weekday: "short", day: "numeric", month: "short" },
+                    ))}
+                    class="cal-date-sub"
+                  />
+                </box>
+                {dayEvents.length ? (
+                  <box vertical spacing={4}>
+                    {dayEvents.map((event) => (
+                      <centerbox class="cal-event-row" valign={Gtk.Align.CENTER}>
+                        <label label={event.title} class="notif-body" $type="start" xalign={0} wrap />
+                        <box $type="center" />
+                        <button class="qs-icon-btn" $type="end" tooltipText={loc("removeEvent")} onClicked={() => removeCalendarEvent(event.id)}>
+                          <icon icon="window-close-symbolic" class="btn-icon" />
+                        </button>
+                      </centerbox>
+                    ))}
+                  </box>
+                ) : (
+                  <label label={loc("noEvents")} class="cal-date-sub" xalign={0} />
+                )}
+                <box spacing={6}>
+                  <entry
+                    hexpand
+                    placeholderText={loc("eventPlaceholder")}
+                    text={eventDraft}
+                    onChanged={(entry) => setEventDraft(entry.text)}
+                    onActivate={addCalendarEvent}
+                  />
+                  <button class="notif-clear-btn" onClicked={addCalendarEvent}>
+                    <label label={loc("addEvent")} />
+                  </button>
+                </box>
+              </box>
+            )
+          }}
+        </With>
 
         {/* Notifications Section */}
         <box class="cal-notifications-header" valign={Gtk.Align.CENTER}>

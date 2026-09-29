@@ -67,8 +67,23 @@ export default function QuickSettings() {
   // Navigation state: "main" | "wifi" | "bluetooth"
   const [currentView, setCurrentView] = createState<"main" | "wifi" | "bluetooth">("main")
 
-  // Power options confirmation
+  // Selecting an action only opens a second, explicit confirmation step.
   const [showPowerConfirm, setShowPowerConfirm] = createState(false)
+  const [pendingPowerAction, setPendingPowerAction] = createState<"shutdown" | "restart" | "suspend" | "logout" | null>(null)
+
+  const executePowerAction = () => {
+    const action = pendingPowerAction()
+    if (!action) return
+    setPendingPowerAction(null)
+    setShowPowerConfirm(false)
+    const commands = {
+      shutdown: "systemctl poweroff",
+      restart: "systemctl reboot",
+      suspend: "systemctl suspend",
+      logout: "loginctl terminate-user $USER",
+    }
+    execAsync(commands[action]).catch((err) => console.error(`Failed to ${action}:`, err))
+  }
 
   // Brightness state
   const [brightness, setBrightness] = createState(0.8)
@@ -118,16 +133,26 @@ export default function QuickSettings() {
   }
 
   // Airplane mode state
-  const [airplaneMode, setAirplaneMode] = createState(false)
+  const [airplaneMode, setAirplaneMode] = createState(
+    !(network.wifi?.enabled ?? true) && !bluetooth.is_powered,
+  )
+  const [systemToggleError, setSystemToggleError] = createState<string | null>(null)
   const toggleAirplaneMode = async () => {
     const next = !airplaneMode()
-    setAirplaneMode(next)
-    if (next) {
-      await execAsync("nmcli radio all off").catch(() => {})
-      await execAsync("bluetoothctl power off").catch(() => {})
-    } else {
-      await execAsync("nmcli radio all on").catch(() => {})
-      await execAsync("nmcli radio wifi on").catch(() => {})
+    setSystemToggleError(null)
+    try {
+      if (next) {
+        await execAsync("nmcli radio all off")
+        await execAsync("bluetoothctl power off")
+      } else {
+        await execAsync("nmcli radio all on")
+        await execAsync("nmcli radio wifi on")
+        await execAsync("bluetoothctl power on")
+      }
+      setAirplaneMode(next)
+    } catch (err) {
+      setSystemToggleError(t("toggleFailed"))
+      console.error("Failed to toggle airplane mode:", err)
     }
   }
 
@@ -145,7 +170,9 @@ export default function QuickSettings() {
       } else {
         await execAsync("nmcli radio wifi on")
       }
-    } catch (_) {
+    } catch (err) {
+      setWifiError(t("toggleFailed"))
+      console.error("Failed to toggle Wi-Fi:", err)
     } finally {
       setIsWifiToggling(false)
     }
@@ -258,7 +285,9 @@ export default function QuickSettings() {
       } else {
         await execAsync("bluetoothctl power off")
       }
-    } catch (_) {
+    } catch (err) {
+      setBtError(t("toggleFailed"))
+      console.error("Failed to toggle Bluetooth:", err)
     } finally {
       setIsBtToggling(false)
     }
@@ -717,7 +746,10 @@ export default function QuickSettings() {
                       class="qs-icon-btn"
                       valign={Gtk.Align.CENTER}
                       tooltipText={loc("powerOff")}
-                      onClicked={() => setShowPowerConfirm(!showPowerConfirm())}
+                      onClicked={() => {
+                        setPendingPowerAction(null)
+                        setShowPowerConfirm(!showPowerConfirm())
+                      }}
                     >
                       <icon icon="system-shutdown-symbolic" class="btn-icon" />
                     </button>
@@ -737,74 +769,111 @@ export default function QuickSettings() {
                   {(show) =>
                     show ? (
                       <box class="qs-power-card" vertical>
+                        <With value={pendingPowerAction}>
+                          {(pendingAction) => pendingAction ? (
+                          <box vertical spacing={10}>
+                            <label
+                              label={pendingAction === "shutdown" ? t("confirmShutDown")
+                                : pendingAction === "restart" ? t("confirmRestart")
+                                : pendingAction === "suspend" ? t("confirmSuspend")
+                                : t("confirmLogOut")}
+                              class="power-heading"
+                              xalign={0}
+                            />
+                            <label label={loc("confirmPowerBody")} class="power-subtext" xalign={0} wrap />
+                            <box spacing={8} homogeneous>
+                              <button class="power-opt-btn" onClicked={() => setPendingPowerAction(null)}>
+                                <label label={loc("cancel")} class="power-btn-label" />
+                              </button>
+                              <button class="power-opt-btn danger" onClicked={executePowerAction}>
+                                <label label={loc("confirm")} class="power-btn-label" />
+                              </button>
+                            </box>
+                          </box>
+                        ) : (
+                          <box vertical spacing={10}>
                         <centerbox>
-                          <label label="Power Options" class="power-heading" $type="start" xalign={0} />
+                          <label label={loc("powerOptions")} class="power-heading" $type="start" xalign={0} />
                           <box $type="center" />
                           <button
                             class="qs-icon-btn"
                             $type="end"
                             onClicked={() => setShowPowerConfirm(false)}
-                            tooltipText="Close"
+                            tooltipText={loc("close")}
                           >
                             <icon icon="window-close-symbolic" class="btn-icon" />
                           </button>
                         </centerbox>
-                        <label label="Choose an action for your current session:" class="power-subtext" xalign={0} />
+                        <label label={loc("choosePowerAction")} class="power-subtext" xalign={0} />
                         <box spacing={8} homogeneous>
                           <button
                             class="power-opt-btn danger"
                             onClicked={() => {
-                              setShowPowerConfirm(false)
-                              execAsync("systemctl poweroff").catch(console.error)
+                              setPendingPowerAction("shutdown")
                             }}
                           >
                             <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
                               <icon icon="system-shutdown-symbolic" class="power-btn-icon" />
-                              <label label="Shut Down" class="power-btn-label" />
+                              <label label={loc("shutDown")} class="power-btn-label" />
                             </box>
                           </button>
                           <button
                             class="power-opt-btn danger"
                             onClicked={() => {
-                              setShowPowerConfirm(false)
-                              execAsync("systemctl reboot").catch(console.error)
+                              setPendingPowerAction("restart")
                             }}
                           >
                             <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
                               <icon icon="system-reboot-symbolic" class="power-btn-icon" />
-                              <label label="Restart" class="power-btn-label" />
+                              <label label={loc("restart")} class="power-btn-label" />
                             </box>
                           </button>
                           <button
                             class="power-opt-btn"
                             onClicked={() => {
-                              setShowPowerConfirm(false)
-                              execAsync("systemctl suspend").catch(console.error)
+                              setPendingPowerAction("suspend")
                             }}
                           >
                             <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
                               <icon icon="system-suspend-symbolic" class="power-btn-icon" />
-                              <label label="Suspend" class="power-btn-label" />
+                              <label label={loc("suspend")} class="power-btn-label" />
                             </box>
                           </button>
                           <button
                             class="power-opt-btn"
                             onClicked={() => {
-                              setShowPowerConfirm(false)
-                              execAsync("loginctl terminate-user $USER").catch(console.error)
+                              setPendingPowerAction("logout")
                             }}
                           >
                             <box vertical halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
                               <icon icon="system-log-out-symbolic" class="power-btn-icon" />
-                              <label label="Log Out" class="power-btn-label" />
+                              <label label={loc("logOut")} class="power-btn-label" />
                             </box>
                           </button>
                         </box>
+                          </box>
+                        )}
+                        </With>
                       </box>
                     ) : (
                       <box />
                     )
                   }
+                </With>
+
+                <With value={systemToggleError}>
+                  {(error) => error ? (
+                    <centerbox class="qs-error-banner" valign={Gtk.Align.CENTER}>
+                      <box $type="start" valign={Gtk.Align.CENTER}>
+                        <icon icon="dialog-error-symbolic" class="error-icon" />
+                        <label label={error} class="error-text" xalign={0} wrap />
+                      </box>
+                      <box $type="center" />
+                      <button class="error-close-btn" $type="end" onClicked={() => setSystemToggleError(null)}>
+                        <icon icon="window-close-symbolic" class="btn-icon" />
+                      </button>
+                    </centerbox>
+                  ) : <box />}
                 </With>
 
                 {/* Feature Pods: 3 columns x 2 rows */}

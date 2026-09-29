@@ -13,10 +13,13 @@ import {
   setClock24h,
   shelfHeight,
   setShelfHeight,
+  cornerRadius,
+  setCornerRadius,
   pinnedApps,
   togglePinApp,
 } from "../lib/settings"
 import { loc } from "../lib/i18n"
+import { applyAccentColor, applyCornerRadius } from "../lib/theme"
 
 type SettingsTab = "general" | "appearance" | "shelf" | "shortcuts" | "about"
 
@@ -189,6 +192,7 @@ export default function Settings() {
                           </box>
                         </button>
                       </box>
+
                     </box>
                   )
                 }
@@ -232,8 +236,29 @@ export default function Settings() {
                               class={accentColor((c) => `accent-color-chip ${c === p.hex ? "selected" : ""}`)}
                               css={`background-color: ${p.hex};`}
                               tooltipText={p.name}
-                              onClicked={() => setAccentColor(p.hex)}
+                              onClicked={() => {
+                                setAccentColor(p.hex)
+                                applyAccentColor(p.hex)
+                              }}
                             />
+                          ))}
+                        </box>
+                      </box>
+
+                      <box class="settings-section-card" vertical spacing={8}>
+                        <label label={loc("cornerRadiusSetting")} class="setting-heading" xalign={0} />
+                        <label label={loc("cornerRadiusDesc")} class="setting-subtext" xalign={0} />
+                        <box spacing={8} css="margin-top: 8px;">
+                          {[16, 24, 28, 32].map((radius) => (
+                            <button
+                              class={cornerRadius((current) => `option-pill-btn ${current === radius ? "active" : ""}`)}
+                              onClicked={() => {
+                                setCornerRadius(radius)
+                                applyCornerRadius(radius)
+                              }}
+                            >
+                              <label label={`${radius}px`} />
+                            </button>
                           ))}
                         </box>
                       </box>
