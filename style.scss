@@ -247,6 +247,21 @@ $active-tint: rgba(255, 255, 255, 0.12);
     margin-right: 10px;
   }
 
+  .slider-mute-btn {
+    border-radius: 9999px;
+    padding: 4px;
+    margin-right: 6px;
+    transition: all 150ms ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .slider-leading-icon {
+      margin-right: 0;
+    }
+  }
+
   scale {
     min-height: 28px;
 
@@ -511,3 +526,240 @@ $active-tint: rgba(255, 255, 255, 0.12);
     color: $on-surface-variant;
   }
 }
+
+// -------------------------------------------------------------
+// 5. QUICK SETTINGS SUBVIEWS (WI-FI & BLUETOOTH)
+// -------------------------------------------------------------
+.pod-chevron {
+  font-size: 14px;
+  color: $on-surface-variant;
+  margin-left: 6px;
+}
+
+.qs-subview-header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .qs-subview-title {
+    font-size: 15px;
+    font-weight: 500;
+    margin-left: 8px;
+  }
+}
+
+.qs-subview-scroll {
+  min-height: 200px;
+}
+
+.qs-list-item {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  transition: all 150ms ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+  }
+  &:active {
+    background-color: rgba(255, 255, 255, 0.16);
+  }
+
+  &.active {
+    background-color: rgba(168, 199, 250, 0.18);
+    .list-title {
+      color: $primary;
+      font-weight: 500;
+    }
+  }
+
+  .list-icon {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+
+  .list-title {
+    font-size: 13px;
+  }
+
+  .list-subtitle {
+    font-size: 11px;
+    color: $on-surface-variant;
+  }
+}
+
+// -------------------------------------------------------------
+// 6. CALENDAR & NOTIFICATIONS PANEL
+// -------------------------------------------------------------
+.CalendarWindow {
+  background: transparent;
+}
+
+.calendar-card {
+  background: $surface-container;
+  border: 1px solid $outline;
+  border-radius: 28px;
+  padding: 20px;
+  min-width: 340px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.calendar-header-pill {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+
+  .cal-date-big {
+    font-size: 16px;
+    font-weight: 500;
+    color: $on-surface;
+  }
+  .cal-date-sub {
+    font-size: 12px;
+    color: $on-surface-variant;
+    margin-top: 2px;
+  }
+}
+
+.calendar-nav-row {
+  margin-bottom: 8px;
+
+  .cal-month-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $primary;
+  }
+}
+
+.cal-weekday-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: $on-surface-variant;
+  min-width: 36px;
+  min-height: 24px;
+}
+
+.cal-day-cell {
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 9999px;
+  margin: 1px;
+  transition: all 150ms ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+  }
+
+  &.today {
+    background-color: $primary;
+    .day-num {
+      color: $on-primary;
+      font-weight: 500;
+    }
+  }
+
+  &.other-month {
+    opacity: 0.35;
+  }
+
+  .day-num {
+    font-size: 12px;
+  }
+}
+
+.cal-notifications-header {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  .notif-section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: $on-surface-variant;
+  }
+  .notif-clear-btn {
+    font-size: 12px;
+    color: $primary;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    &:hover { background-color: rgba(255, 255, 255, 0.08); }
+  }
+}
+
+.notif-item {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-top: 6px;
+
+  .notif-title {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .notif-body {
+    font-size: 11px;
+    color: $on-surface-variant;
+  }
+}
+
+// -------------------------------------------------------------
+// 7. LIGHT THEME OVERRIDES
+// -------------------------------------------------------------
+.light-theme {
+  background-color: rgba(245, 242, 248, 0.96);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1d1b20;
+
+  label, icon {
+    color: #1d1b20;
+  }
+
+  .qs-user-pill, .calendar-header-pill {
+    background-color: rgba(0, 0, 0, 0.06);
+    .qs-user-name, .cal-date-big { color: #1d1b20; }
+    .qs-user-avatar { color: #0b57d0; }
+    .cal-date-sub { color: #49454f; }
+  }
+
+  .qs-icon-btn, .slider-mute-btn {
+    background-color: rgba(0, 0, 0, 0.06);
+    &:hover { background-color: rgba(0, 0, 0, 0.12); }
+    .btn-icon { color: #1d1b20; }
+  }
+
+  .qs-pod {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.04);
+    &:hover { background-color: rgba(0, 0, 0, 0.10); }
+
+    .pod-icon, .pod-title { color: #1d1b20; }
+    .pod-subtitle { color: #49454f; }
+    .pod-chevron { color: #49454f; }
+
+    &.active {
+      background-color: #0b57d0;
+      .pod-icon, .pod-title { color: #ffffff; }
+      .pod-subtitle { color: rgba(255, 255, 255, 0.85); }
+      .pod-chevron { color: #ffffff; }
+    }
+  }
+
+  .qs-slider-row {
+    background-color: rgba(0, 0, 0, 0.06);
+    .slider-leading-icon, .slider-value-label { color: #49454f; }
+  }
+
+  .qs-list-item {
+    background-color: rgba(0, 0, 0, 0.04);
+    &:hover { background-color: rgba(0, 0, 0, 0.08); }
+    .list-title { color: #1d1b20; }
+    .list-subtitle { color: #49454f; }
+    &.active {
+      background-color: rgba(11, 87, 208, 0.12);
+      .list-title { color: #0b57d0; }
+    }
+  }
+}
+

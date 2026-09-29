@@ -4,6 +4,7 @@ import Shelf from "./widget/Shelf"
 import QuickSettings from "./widget/QuickSettings"
 import Launcher from "./widget/Launcher"
 import ScreenCapture from "./widget/ScreenCapture"
+import Calendar from "./widget/Calendar"
 
 app.start({
   instanceName: "ags",
@@ -18,5 +19,6 @@ app.start({
     QuickSettings()
     Launcher()
     ScreenCapture()
+    Calendar()
   },
 })

@@ -53,7 +53,7 @@ export default function ScreenCapture() {
       exclusivity={Astal.Exclusivity.NONE}
       layer={Astal.Layer.OVERLAY}
       keymode={Astal.Keymode.ON_DEMAND}
-      marginBottom={76}
+      marginBottom={16}
       visible={false}
       application={app}
     >

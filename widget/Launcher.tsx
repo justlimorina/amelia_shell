@@ -61,7 +61,7 @@ export default function Launcher() {
       exclusivity={Astal.Exclusivity.NONE}
       layer={Astal.Layer.OVERLAY}
       keymode={Astal.Keymode.ON_DEMAND}
-      marginBottom={68}
+      marginBottom={8}
       marginLeft={12}
       visible={false}
       application={app}

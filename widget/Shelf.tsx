@@ -108,8 +108,8 @@ export default function Shelf(gdkmonitor: Gdk.Monitor) {
           {/* Date & Time Pill */}
           <button
             class="shelf-pill"
-            tooltipText="Date & Time"
-            onClicked={() => app.toggle_window("quicksettings")}
+            tooltipText="Calendar & Notifications"
+            onClicked={() => app.toggle_window("calendar")}
             valign={Gtk.Align.CENTER}
           >
             <box valign={Gtk.Align.CENTER}>
